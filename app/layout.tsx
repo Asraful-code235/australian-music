@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import DefaultProvider from '@/components/providers/DefaultProvider';
 import { Suspense } from 'react';
+import Loading from '@/components/shared/Loading';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,7 +21,7 @@ export default async function RootLayout({
     <html lang='en'>
       <body className={inter.className}>
         <DefaultProvider>
-          <Suspense fallback='loading...'>{children}</Suspense>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </DefaultProvider>
       </body>
     </html>

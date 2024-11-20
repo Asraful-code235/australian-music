@@ -1,5 +1,6 @@
 'use client';
 
+import Loading from '@/components/shared/Loading';
 import { useSession } from 'next-auth/react';
 import { redirect, usePathname } from 'next/navigation';
 
@@ -11,7 +12,7 @@ export default function PrivateLayout({
   const nextURL = { callbackUrl: pathname };
   const queryParams = new URLSearchParams(nextURL).toString();
   if (status === 'loading') {
-    return 'loading...';
+    return <Loading />;
   }
 
   if (!session) {
