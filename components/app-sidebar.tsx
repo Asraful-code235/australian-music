@@ -73,11 +73,11 @@ export async function AppSidebar({
         items: [
           {
             title: "Commercial Top 20",
-            url: "#",
+            url: "/dashboard/tracks/top",
           },
           {
             title: "Commercial Gigs",
-            url: "#",
+            url: "/dashboard/tracks/gigs",
           },
         ],
       },

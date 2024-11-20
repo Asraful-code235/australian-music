@@ -6,7 +6,7 @@ export default async function Home() {
   const user = await auth();
 
   if (user) {
-    redirect("/tracks");
+    redirect("/dashboard");
   }
   return <LoginForm />;
 }
