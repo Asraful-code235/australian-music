@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { AppSidebar } from "@/components/app-sidebar";
 import TopbarNavigation from "@/components/dashboard/TopbarNavigation";
 import {
@@ -6,12 +7,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await auth();
+
   return (
     <>
       <SidebarProvider

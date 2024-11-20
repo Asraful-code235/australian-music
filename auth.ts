@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { saltAndHashPassword } from "./utils/helper";
+import { Session } from "next-auth";
 
 export const {
   handlers: { GET, POST },
@@ -64,4 +65,28 @@ export const {
       },
     }),
   ],
+  callbacks: {
+    authorized({ request: { nextUrl }, auth }) {
+      const isLoggedIn = !!auth?.user;
+
+      return isLoggedIn;
+    },
+    jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user!.role;
+      }
+      if (trigger === "update" && session) {
+        token = { ...token, ...session };
+      }
+      return token;
+    },
+    session({ session, token }) {
+      // @ts-ignore
+      session.user.id = token.id;
+      // @ts-ignore
+      session.user.role = token.role;
+      return session;
+    },
+  },
 });

@@ -18,11 +18,6 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(absoluteURL.toString());
   }
 
-  if (session?.user) {
-    const tracksURL = new URL("/tracks", request.nextUrl.origin);
-    return NextResponse.redirect(tracksURL.toString());
-  }
-
   return NextResponse.next();
 }
 
