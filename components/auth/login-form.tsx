@@ -51,8 +51,6 @@ export default function LoginForm() {
       });
 
       if (result) {
-        console.log({ result });
-
         if (result.ok && result.status === 200) {
           toast.success('Login successfully');
           router.push(previousURL ?? '/dashboard');

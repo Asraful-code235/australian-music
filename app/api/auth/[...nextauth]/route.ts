@@ -42,13 +42,9 @@ const authOptions = {
           throw new Error('Email and password are required');
         }
 
-        console.log({ email, password });
-
         const user = await prisma.user.findUnique({
           where: { email },
         });
-
-        console.log('User found:', user);
 
         if (!user || !(await bcrypt.compare(password, user?.password ?? ''))) {
           return null;

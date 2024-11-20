@@ -13,7 +13,6 @@ export default function PrivateLayout({
   if (status === 'loading') {
     return 'loading...';
   }
-  console.log({ session });
 
   if (!session) {
     redirect(`/login?${queryParams}`);
