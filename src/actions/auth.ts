@@ -1,29 +1,30 @@
-"use server";
+'use server';
 
-import { z } from "zod";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { signIn } from "next-auth/react";
+import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import { prisma } from '../../prisma/db/prisma';
+import { signIn } from 'next-auth/react';
 
 const LoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export type LoginFormInput = z.infer<typeof LoginSchema>;
 
 export async function loginUser(data: LoginFormInput) {
+  console.log();
   const validatedFields = LoginSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Invalid input",
+      message: 'Invalid input',
     };
   }
 
   try {
-    const result = await signIn("credentials", {
+    const result = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
@@ -32,27 +33,27 @@ export async function loginUser(data: LoginFormInput) {
     if (result?.error) {
       return {
         errors: null,
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
       };
     }
 
     return {
-      message: "Login successful",
+      message: 'Login successful',
     };
   } catch (error) {
     console.log(error);
     return {
       errors: null,
-      message: "An error occurred during login",
+      message: 'An error occurred during login',
     };
   }
 }
 
 const RegisterSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["USER", "ADMIN"]),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  role: z.enum(['USER', 'ADMIN']),
 });
 
 export type RegisterFormInput = z.infer<typeof RegisterSchema>;
@@ -63,7 +64,7 @@ export async function registerUser(data: RegisterFormInput) {
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: "Invalid input",
+      message: 'Invalid input',
     };
   }
 
@@ -75,7 +76,7 @@ export async function registerUser(data: RegisterFormInput) {
     if (existingUser) {
       return {
         errors: null,
-        message: "User with this email already exists",
+        message: 'User with this email already exists',
       };
     }
 
@@ -90,13 +91,13 @@ export async function registerUser(data: RegisterFormInput) {
       },
     });
     return {
-      message: "User registered successfully",
+      message: 'User registered successfully',
     };
   } catch (error) {
     console.log(error);
     return {
       errors: null,
-      message: "An error occurred during registration",
+      message: 'An error occurred during registration',
     };
   }
 }
@@ -118,13 +119,13 @@ export async function updateUser(
     });
 
     return {
-      message: "User updated successfully",
+      message: 'User updated successfully',
     };
   } catch (error) {
     console.log(error);
     return {
       errors: null,
-      message: "An error occurred while updating the user",
+      message: 'An error occurred while updating the user',
     };
   }
 }
@@ -136,13 +137,13 @@ export async function deleteUser(userId: string) {
     });
 
     return {
-      message: "User deleted successfully",
+      message: 'User deleted successfully',
     };
   } catch (error) {
     console.log(error);
     return {
       errors: null,
-      message: "An error occurred while deleting the user",
+      message: 'An error occurred while deleting the user',
     };
   }
 }

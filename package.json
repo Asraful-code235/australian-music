@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate --schema='/src/prisma/schema.prisma'"
+    "lint": "next lint"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
@@ -32,7 +31,7 @@
     "mongodb": "^6.10.0",
     "mongoose": "^8.8.2",
     "next": "14.2.15",
-    "next-auth": "^5.0.0-beta.25",
+    "next-auth": "^4.24.10",
     "next-themes": "^0.4.3",
     "react": "^18",
     "react-dom": "^18",
@@ -44,6 +43,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/next-auth": "^3.15.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
