@@ -26,6 +26,7 @@ import { getTracks } from '@/actions/tracks/GetTracks';
 import { addTracks } from '@/actions/tracks/AddTracks';
 import { updateTrackPosition } from '@/actions/tracks/UpdateTrackPosition';
 import AllTracks from '../shared/tracks/AllTracks';
+import Loading from '../shared/loading/Loading';
 
 export default function TracksPage() {
   const { data: session, status } = useSession();
@@ -108,11 +109,7 @@ export default function TracksPage() {
   }, [tracksData]);
 
   if (status === 'loading' || trackLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <Loader2 className='h-8 w-8 animate-spin' />
-      </div>
-    );
+    return <Loading />;
   }
 
   const handleSavePlaylist = async () => {

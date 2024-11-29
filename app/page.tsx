@@ -1,12 +1,5 @@
-import { auth } from "@/auth";
-import LoginForm from "@/components/auth/login-form";
-import { redirect } from "next/navigation";
+import LoginForm from '@/components/auth/login-form';
 
 export default async function Home() {
-  const user = await auth();
-
-  if (user) {
-    redirect("/dashboard");
-  }
-  return <LoginForm />;
+  return <div>This is home page</div>;
 }
