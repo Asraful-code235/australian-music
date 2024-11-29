@@ -94,18 +94,39 @@ model Authenticator {
 }
 
 
+model Mix {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  tracks    MixTrack[]    @relation("MixTracks")
+}
+
 model Track {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String  
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
   artist      String?
-  djId        String   @db.ObjectId 
-  releaseDate  DateTime? 
-  isCustom Boolean?
-  position Int?
-  status String?
+  djId        String        @db.ObjectId
+  releaseDate DateTime?
+  isCustom    Boolean?
+  position    Int?
+  status      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  dj          User          @relation(fields: [djId], references: [id], onDelete: Cascade)
+  mixes       MixTrack[]    @relation("TrackMixes")
+}
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model MixTrack {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  mixId     String   @db.ObjectId
+  trackId   String   @db.ObjectId
 
-  dj User @relation(fields: [djId], references: [id], onDelete: Cascade)
+  mix       Mix      @relation("MixTracks", fields: [mixId], references: [id], onDelete: Cascade)
+  track     Track    @relation("TrackMixes", fields: [trackId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([mixId, trackId])
 }
