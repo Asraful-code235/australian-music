@@ -42,7 +42,7 @@ export default function TracksPage() {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: () =>
-      getTracks()
+      getTracks(session?.user.id)
         .then((data) => data)
         .catch((error) => console.error(error)),
   });
@@ -99,7 +99,11 @@ export default function TracksPage() {
 
   useEffect(() => {
     if (tracksData) {
-      setTracks(tracksData);
+      const typedTracksData = tracksData.map((item: any) => ({
+        ...item,
+        position: item.position || 1, // Default to 1 if position is missing
+      })) as Track[];
+      setTracks(typedTracksData);
     }
   }, [tracksData]);
 

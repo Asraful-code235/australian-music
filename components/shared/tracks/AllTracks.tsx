@@ -12,6 +12,8 @@ type AllTracksProps = {
 };
 
 export default function AllTracks({ tracks, refetch }: AllTracksProps) {
+  console.log({ tracks });
+
   return (
     <SortableContext items={tracks} strategy={verticalListSortingStrategy}>
       <div className='space-y-2'>
