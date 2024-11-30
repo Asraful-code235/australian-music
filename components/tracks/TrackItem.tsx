@@ -7,12 +7,9 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { GripVertical, Save, Edit, X } from 'lucide-react';
-import { Track } from '@/types/track';
+import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
-import {
-  updateTrack,
-  updateTrackWithMixes,
-} from '@/actions/tracks/UpdateTrack';
+import { updateTrackWithMixes } from '@/actions/tracks/UpdateTrack';
 import {
   QueryObserverResult,
   useInfiniteQuery,
@@ -24,7 +21,7 @@ import { addMix } from '@/actions/tracks/AddMix';
 import Select from 'react-select/async-creatable';
 
 interface TrackItemProps {
-  track: Track;
+  track: UserTrack;
   refetch?: () => Promise<QueryObserverResult>;
   error: () => Array<boolean> | undefined;
   index: number;
@@ -47,16 +44,19 @@ const useMixes = (search: string) => {
 
 export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTrack, setEditedTrack] = useState(track);
+  const [editedTrack, setEditedTrack] = useState(track.track);
   const [isDragged, setIsDragged] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedMixes, setSelectedMixes] = useState(
-    track.mixes?.map((item) => ({
-      label: item.mix.title,
-      value: item.mix.id,
-    })) || []
+    track?.track?.mixes
+      ?.filter((item) => item?.mix?.title && item?.mix?.id)
+      .map((item) => ({
+        label: item.mix?.title || '',
+        value: item.mix?.id || '',
+      })) || []
   );
+
   const [allOptions, setAllOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -68,43 +68,20 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     useSortable({ id: track.id });
 
   const handleSave = async () => {
-    const updatedTrack: Track = {
+    if (!editedTrack) return;
+    const updatedTrack: Tracks = {
       ...editedTrack,
-      status: editedTrack.status || null,
-      djId: editedTrack.djId || '',
-      isCustom: editedTrack.isCustom || null,
-      position: editedTrack.position || null,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
-
-    // Prepare the mixes payload
-    const mixesPayload = selectedMixes.map((mix) => ({
-      mixId: mix.value,
-      trackId: updatedTrack.id,
-    }));
-
-    const payload = {
-      id: updatedTrack.id,
-      title: updatedTrack.title,
-      artist: updatedTrack.artist,
-      releaseDate: updatedTrack.releaseDate,
-      status: updatedTrack.status,
-      djId: updatedTrack.djId,
-      isCustom: updatedTrack.isCustom,
-      position: updatedTrack.position,
-      mixes: mixesPayload,
-      createdAt: updatedTrack.createdAt,
-      updatedAt: updatedTrack.updatedAt,
     };
 
     setIsEditing(false);
 
     try {
-      // await updateTrack(payload);
+      if (!editedTrack) return;
       await updateTrackWithMixes({
-        trackId: editedTrack.id,
-        mixIds: selectedMixes.map((item) => item.value),
+        trackId: editedTrack?.id,
+        mixIds: selectedMixes.map((item) => item.value || ''),
         title: updatedTrack.title,
         artist: updatedTrack.artist !== null ? updatedTrack.artist : '',
       });
@@ -219,16 +196,32 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
           <div className='w-full flex gap-4'>
             <Input
               placeholder='Title'
-              value={editedTrack.title}
+              value={editedTrack?.title}
               onChange={(e) =>
-                setEditedTrack({ ...editedTrack, title: e.target.value })
+                setEditedTrack((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    title: e.target.value,
+                    createdAt: prev.createdAt ?? new Date(),
+                    updatedAt: new Date(),
+                  };
+                })
               }
             />
             <Input
               placeholder='Artist'
-              value={editedTrack.artist || ''}
+              value={editedTrack?.artist || ''}
               onChange={(e) =>
-                setEditedTrack({ ...editedTrack, artist: e.target.value })
+                setEditedTrack((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    artist: e.target.value,
+                    createdAt: prev.createdAt ?? new Date(),
+                    updatedAt: new Date(),
+                  };
+                })
               }
             />
           </div>
@@ -258,8 +251,8 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
         </div>
       ) : (
         <div className='flex-1 grid grid-cols-3 gap-4'>
-          <span className='truncate'>{track.title}</span>
-          <span className='truncate'>{track.artist}</span>
+          <span className='truncate'>{track?.track?.title}</span>
+          <span className='truncate'>{track?.track?.artist}</span>
           {/* <span>{track.releaseDate}</span> */}
         </div>
       )}

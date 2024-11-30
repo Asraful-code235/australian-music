@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { Music, Plus, Loader2 } from 'lucide-react';
-import { Track } from '@/types/track';
+import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
@@ -31,7 +31,7 @@ import Loading from '../shared/loading/Loading';
 export default function TracksPage() {
   const { data: session, status } = useSession();
 
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [tracks, setTracks] = useState<UserTrack[]>([]);
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState([]);
@@ -73,14 +73,14 @@ export default function TracksPage() {
   const handleAddTrack = async () => {
     if (!search.trim()) return;
 
-    const djId = session?.user.id;
-    if (!djId) {
+    const userId = session?.user.id;
+    if (!userId) {
       console.error('User ID is not available in the session.');
       return;
     }
 
     try {
-      const res = await addTracks({ title: search, djId });
+      const res = await addTracks({ title: search, userId });
 
       refetch();
       setSearch('');
@@ -102,7 +102,7 @@ export default function TracksPage() {
       const typedTracksData = tracksData.map((item: any) => ({
         ...item,
         position: item.position || 1, // Default to 1 if position is missing
-      })) as Track[];
+      })) as UserTrack[];
       setTracks(typedTracksData);
     }
   }, [tracksData]);
@@ -139,10 +139,10 @@ export default function TracksPage() {
   const handleError = (): Array<boolean> | undefined => {
     const errorArray = tracksData?.map((item) => {
       return (
-        item.artist === null ||
-        item.artist === '' ||
-        item.title === null ||
-        item.mixes.length < 1
+        item.track.artist === null ||
+        item.track.artist === '' ||
+        item.track.title === null ||
+        item.track.mixes.length < 1
       );
     });
     return errorArray ?? [];

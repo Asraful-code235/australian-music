@@ -4,23 +4,30 @@ import { db } from '@/db';
 
 type Tracks = {
   title: string;
-  djId: string;
+  userId: string;
 };
 
-export async function addTracks({ title, djId }: Tracks) {
+export async function addTracks({ title, userId }: Tracks) {
   try {
-    const newTrack = await db.track.create({
+    const newTrack = await db.tracks.create({
       data: {
         title,
-        dj: { connect: { id: djId } },
+      },
+    });
+
+    const newTrackUser = await db.userTrack.create({
+      data: {
+        trackId: newTrack.id,
+        userId,
       },
     });
 
     return {
       message: 'Track added successfully',
-      newTrack,
+      newTrackUser,
     };
   } catch (error: unknown) {
     console.error('Error creating track:', error);
+    throw new Error('Failed to create track');
   }
 }

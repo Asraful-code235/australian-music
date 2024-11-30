@@ -1,5 +1,5 @@
 import { TrackItem } from '@/components/tracks/TrackItem';
-import { Track } from '@/types/track';
+import { Tracks, UserTrack } from '@/types/track';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -7,14 +7,14 @@ import {
 import { QueryObserverResult } from '@tanstack/react-query';
 
 type AllTracksProps = {
-  tracks: Track[];
+  tracks?: UserTrack[];
   refetch?: () => Promise<QueryObserverResult>;
   error: () => Array<boolean> | undefined;
 };
 
 export default function AllTracks({ tracks, refetch, error }: AllTracksProps) {
   return (
-    <SortableContext items={tracks} strategy={verticalListSortingStrategy}>
+    <SortableContext items={tracks!} strategy={verticalListSortingStrategy}>
       <div className='space-y-3'>
         {tracks && tracks.length > 0
           ? tracks.map((track, index) => (

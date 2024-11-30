@@ -1,49 +1,77 @@
-enum UserRole {
-  ADMIN,
-  USER,
-}
-
-export type TrackMixes = {
-  id: string;
-  mix: Mix;
-  mixId: string;
-  trackId: string;
-};
-
-export interface Track {
-  status: string | null;
-  id: string;
-  title: string;
-  artist?: string | null;
-  djId: string;
-  releaseDate: Date | null | undefined;
-  isCustom?: boolean | null;
-  position?: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  mixes?: TrackMixes[];
-  dj?: User;
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
 }
 
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: Date;
-  role: UserRole;
-  tracks: Track[];
+  id: string; // MongoDB ObjectId
+  name?: string | null;
+  email?: string | null;
+  hashedPassword?: string | null;
+  emailVerified?: Date | null;
+  image?: string | null;
+  role?: UserRole | null;
+  users?: UserTrack[];
   createdAt: Date;
   updatedAt: Date;
-  djId: string;
-  image: string;
+}
+
+export type Tracks = {
+  id: string; // MongoDB ObjectId
+  title: string;
+  artist?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: UserTrack[];
+  mixes?: MixTrack[];
+};
+
+export interface UserTrack {
+  id: string;
+  userId: string;
+  trackId: string;
+  isExport?: boolean | null;
+  status?: string | null;
+  position?: number | null;
+  user?: User;
+  track?: Tracks;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Mix {
   id: string;
   title: string;
-  status?: string | null;
-  djId?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  mixId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tracks?: MixTrack[];
+}
+
+export interface MixTrack {
+  id: string;
+  mixId: string;
+  trackId: string;
+  mix?: Mix;
+  track?: Tracks;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateTrackInput {
+  title: string;
+  artist?: string;
+  userId: string;
+}
+
+export interface CreateUserTrackInput {
+  userId: string;
+  trackId: string;
+  isExport?: boolean;
+  status?: string;
+  position?: number;
+}
+
+export interface CreateMixTrackInput {
+  mixId: string;
+  trackId: string;
 }

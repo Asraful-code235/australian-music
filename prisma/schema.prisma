@@ -27,68 +27,10 @@ model User {
   image          String?
   role           UserRole?
   // Optional for WebAuthn support
-  tracks Track[]
+  users       UserTrack[]  @relation("userTracks")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-// model Account {
-//   id                String  @id @default(auto()) @map("_id") @db.ObjectId
-//   userId            String  @db.ObjectId
-//   type              String
-//   provider          String
-//   providerAccountId String
-//   refresh_token     String? @db.String
-//   access_token      String? @db.String
-//   expires_at        Int?
-//   token_type        String?
-//   scope             String?
-//   id_token          String? @db.String
-//   session_state     String?
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@unique([provider, providerAccountId])
-// }
-
-// model Session {
-//   id           String   @id @default(auto()) @map("_id") @db.ObjectId
-//   sessionToken String   @unique
-//   userId       String   @db.ObjectId
-//   expires      DateTime
-//   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
-// model VerificationToken {
-//   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-//   identifier String
-//   token      String
-//   expires    DateTime
-
-//   @@unique([identifier, token])
-// }
-
-// Optional for WebAuthn support
-// model Authenticator {
-//   credentialID         String  @id @map("_id")
-//   userId               String  @db.ObjectId
-//   providerAccountId    String
-//   credentialPublicKey  String
-//   counter              Int
-//   credentialDeviceType String
-//   credentialBackedUp   Boolean
-//   transports           String?
-
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@unique([userId, credentialID])
-// }
 
 
 model Mix {
@@ -99,19 +41,34 @@ model Mix {
   tracks    MixTrack[]    @relation("MixTracks")
 }
 
-model Track {
+model Tracks {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   artist      String?
-  djId        String        @db.ObjectId
-  releaseDate DateTime?
-  isCustom    Boolean?
-  position    Int?
-  status      String?
+ 
+ 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  dj          User          @relation(fields: [djId], references: [id], onDelete: Cascade)
+
+  user       UserTrack[]   @relation("userTracks")
   mixes       MixTrack[]    @relation("TrackMixes")
+ 
+}
+
+model UserTrack {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String   @db.ObjectId
+  trackId  String   @db.ObjectId
+
+  isExport   Boolean?
+  status      String?
+  position    Int?
+ 
+  user     User     @relation("userTracks",fields: [userId], references: [id], onDelete: Cascade)
+  track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MixTrack {
@@ -120,7 +77,7 @@ model MixTrack {
   trackId   String   @db.ObjectId
 
   mix       Mix      @relation("MixTracks", fields: [mixId], references: [id], onDelete: Cascade)
-  track     Track    @relation("TrackMixes", fields: [trackId], references: [id], onDelete: Cascade)
+  track     Tracks    @relation("TrackMixes", fields: [trackId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
