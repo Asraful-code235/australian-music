@@ -34,11 +34,12 @@ export default function TracksPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState([]);
 
   const {
     isLoading: trackLoading,
     data: tracksData,
-    error,
+    error: trackError,
     refetch,
   } = useQuery({
     queryKey: ['categories'],
@@ -62,7 +63,7 @@ export default function TracksPage() {
           position: index + 1,
         })
       );
-      console.log({ newTracks });
+
       setTracks(newTracks);
       await updateTrackPosition(newTracks);
       refetch();
@@ -80,12 +81,10 @@ export default function TracksPage() {
 
     try {
       const res = await addTracks({ title: search, djId });
-      //   console.log('Track added successfully:', res);
-      //   if (res && res.newTrack && ObjectId.isValid(res.newTrack.id)) {
+
       refetch();
       setSearch('');
       toast.success('Track added successfully');
-      // }
     } catch (error) {
       console.error('Error adding track:', error);
     }
@@ -137,7 +136,19 @@ export default function TracksPage() {
     }
   };
 
-  console.log({ tracksData, session });
+  const handleError = (): Array<boolean> | undefined => {
+    const errorArray = tracksData?.map((item) => {
+      return (
+        item.artist === null ||
+        item.artist === '' ||
+        item.title === null ||
+        item.mixes.length < 1
+      );
+    });
+    return errorArray ?? [];
+  };
+
+  const allTrue = handleError()?.every((value) => value === false) ?? true;
 
   if (!session) {
     return (
@@ -169,7 +180,7 @@ export default function TracksPage() {
           </Command>
 
           {search && (
-            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg'>
+            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-10'>
               <div className='p-2'>
                 <Button
                   variant='ghost'
@@ -189,14 +200,18 @@ export default function TracksPage() {
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <AllTracks tracks={tracks || []} refetch={refetch} />
+          <AllTracks
+            tracks={tracks || []}
+            refetch={refetch}
+            error={handleError}
+          />
         </DndContext>
 
         {tracks.length > 0 && (
           <Button
             className='w-full'
             onClick={handleSavePlaylist}
-            disabled={tracks.length !== 20 || isSaving}
+            disabled={tracks.length !== 20 || isSaving || !allTrue}
           >
             {isSaving ? (
               <>
