@@ -21,10 +21,10 @@ import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
-import { getTracks } from '@/actions/tracks/GetTracks';
+import { getTracks } from '@/actions/upfront-tracks/GetTracks';
 
-import { addTracks } from '@/actions/tracks/AddTracks';
-import { updateTrackPosition } from '@/actions/tracks/UpdateTrackPosition';
+import { addTracks } from '@/actions/upfront-tracks/AddTracks';
+import { updateTrackPosition } from '@/actions/upfront-tracks/UpdateTrackPosition';
 import AllTracks from '../shared/tracks/AllTracks';
 import Loading from '../shared/loading/Loading';
 
@@ -42,7 +42,7 @@ export default function TracksPage() {
     error: trackError,
     refetch,
   } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['upfront-tracks'],
     queryFn: () =>
       getTracks(session?.user.id)
         .then((data) => data)
@@ -101,15 +101,17 @@ export default function TracksPage() {
     if (tracksData) {
       const typedTracksData = tracksData.map((item: any) => ({
         ...item,
-        position: item.position || 1, // Default to 1 if position is missing
+        position: item.position || 1,
       })) as UserTrack[];
       setTracks(typedTracksData);
     }
-  }, [tracksData]);
+  }, [tracksData, refetch]);
 
   if (status === 'loading' || trackLoading) {
     return <Loading />;
   }
+
+  console.log({ tracksData });
 
   const handleSavePlaylist = async () => {
     if (!session) {
@@ -137,12 +139,13 @@ export default function TracksPage() {
   };
 
   const handleError = (): Array<boolean> | undefined => {
-    const errorArray = tracksData?.map((item) => {
+    const errorArray = tracks?.map((item) => {
       return (
-        item.track.artist === null ||
-        item.track.artist === '' ||
-        item.track.title === null ||
-        item.track.mixes.length < 1
+        item.artist === null ||
+        item.artist === '' ||
+        item?.track?.title === null ||
+        !item.mixes ||
+        item.mixes.length < 1
       );
     });
     return errorArray ?? [];

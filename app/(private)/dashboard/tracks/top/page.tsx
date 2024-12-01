@@ -1,5 +1,5 @@
-import TracksPage from "@/components/tracks/Tracks";
+import TracksPage from '@/components/tracks/Tracks';
 
-export default function CommertialTop() {
+export default function CommercialTop() {
   return <TracksPage />;
 }

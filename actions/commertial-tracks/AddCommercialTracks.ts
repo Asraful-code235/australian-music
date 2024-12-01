@@ -15,7 +15,7 @@ export async function addTracks({ title, userId }: Tracks) {
       },
     });
 
-    const newTrackUser = await db.userTrack.create({
+    const newTrackUser = await db.commercialTrack.create({
       data: {
         trackId: newTrack.id,
         userId,

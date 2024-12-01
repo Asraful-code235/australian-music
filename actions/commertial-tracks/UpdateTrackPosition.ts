@@ -7,7 +7,7 @@ export async function updateTrackPosition(items: UserTrack[]) {
   try {
     await db.$transaction(
       items.map((item: UserTrack) => {
-        return db.userTrack.update({
+        return db.commercialTrack.update({
           where: { id: item.id },
           data: { position: item.position },
         });

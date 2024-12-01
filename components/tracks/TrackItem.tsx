@@ -9,16 +9,17 @@ import { Button } from '@/components/ui/button';
 import { GripVertical, Save, Edit, X } from 'lucide-react';
 import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
-import { updateTrackWithMixes } from '@/actions/tracks/UpdateTrack';
+
 import {
   QueryObserverResult,
   useInfiniteQuery,
   useQuery,
 } from '@tanstack/react-query';
-import { getMix } from '@/actions/tracks/GetMix';
+import { getMix } from '@/actions/shared/GetMix';
 import { MultiValue, ActionMeta } from 'react-select';
-import { addMix } from '@/actions/tracks/AddMix';
+import { addMix } from '@/actions/shared/AddMix';
 import Select from 'react-select/async-creatable';
+import { updateUpfrontTrackWithMixes } from '@/actions/upfront-tracks/UpdateTrack';
 
 interface TrackItemProps {
   track: UserTrack;
@@ -44,12 +45,13 @@ const useMixes = (search: string) => {
 
 export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTrack, setEditedTrack] = useState(track.track);
+  const [editedTrack, setEditedTrack] = useState(track);
   const [isDragged, setIsDragged] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [trackTitle, setTrackTitle] = useState(track?.track?.title || '');
   const [selectedMixes, setSelectedMixes] = useState(
-    track?.track?.mixes
+    track?.mixes
       ?.filter((item) => item?.mix?.title && item?.mix?.id)
       .map((item) => ({
         label: item.mix?.title || '',
@@ -69,21 +71,17 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
 
   const handleSave = async () => {
     if (!editedTrack) return;
-    const updatedTrack: Tracks = {
-      ...editedTrack,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
 
     setIsEditing(false);
 
     try {
       if (!editedTrack) return;
-      await updateTrackWithMixes({
-        trackId: editedTrack?.id,
+      await updateUpfrontTrackWithMixes({
+        upfrontId: editedTrack?.id,
+        trackId: editedTrack?.trackId || '',
         mixIds: selectedMixes.map((item) => item.value || ''),
-        title: updatedTrack.title,
-        artist: updatedTrack.artist !== null ? updatedTrack.artist : '',
+        title: trackTitle || '',
+        artist: editedTrack?.artist !== null ? editedTrack?.artist : '',
       });
       if (refetch) {
         refetch();
@@ -114,6 +112,8 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       }
     };
   }, [isDragged, setNodeRef]);
+
+  console.log({ editedTrack });
 
   const handleDragStart = () => {
     setIsDragged(true);
@@ -196,18 +196,8 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
           <div className='w-full flex gap-4'>
             <Input
               placeholder='Title'
-              value={editedTrack?.title}
-              onChange={(e) =>
-                setEditedTrack((prev) => {
-                  if (!prev) return prev;
-                  return {
-                    ...prev,
-                    title: e.target.value,
-                    createdAt: prev.createdAt ?? new Date(),
-                    updatedAt: new Date(),
-                  };
-                })
-              }
+              value={trackTitle}
+              onChange={(e) => setTrackTitle(e.target.value)}
             />
             <Input
               placeholder='Artist'
@@ -252,7 +242,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       ) : (
         <div className='flex-1 grid grid-cols-3 gap-4'>
           <span className='truncate'>{track?.track?.title}</span>
-          <span className='truncate'>{track?.track?.artist}</span>
+          <span className='truncate'>{track?.artist}</span>
           {/* <span>{track.releaseDate}</span> */}
         </div>
       )}

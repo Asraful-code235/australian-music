@@ -19,11 +19,10 @@ export interface User {
 export type Tracks = {
   id: string; // MongoDB ObjectId
   title: string;
-  artist?: string | null;
+
   createdAt: Date;
   updatedAt: Date;
   user?: UserTrack[];
-  mixes?: MixTrack[];
 };
 
 export interface UserTrack {
@@ -37,6 +36,8 @@ export interface UserTrack {
   track?: Tracks;
   createdAt: Date;
   updatedAt: Date;
+  mixes?: MixTrack[];
+  artist?: string | null;
 }
 
 export interface Mix {
