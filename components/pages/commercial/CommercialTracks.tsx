@@ -17,30 +17,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { Music, Plus, Loader2 } from 'lucide-react';
-import { Track } from '@/types/track';
+import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
-import { getTracks } from '@/actions/tracks/GetTracks';
 
-import { addTracks } from '@/actions/tracks/AddTracks';
-import { updateTrackPosition } from '@/actions/tracks/UpdateTrackPosition';
-import AllTracks from '../shared/tracks/AllTracks';
+import AllTracks from '../../shared/tracks/AllTracks';
+import Loading from '../../shared/loading/Loading';
+import { getTracks } from '@/actions/commercial-tracks/GetTracks';
+import { updateTrackPosition } from '@/actions/commercial-tracks/UpdateTrackPosition';
+import { addTracks } from '@/actions/commercial-tracks/AddCommercialTracks';
 
-export default function TracksPage() {
+export default function CommercialPage() {
   const { data: session, status } = useSession();
 
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [tracks, setTracks] = useState<UserTrack[]>([]);
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState([]);
 
   const {
     isLoading: trackLoading,
-    data: tracksData,
-    error,
+    data: commercialTracksData,
+    error: trackError,
     refetch,
   } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['upfront-tracks'],
     queryFn: () =>
       getTracks(session?.user.id)
         .then((data) => data)
@@ -61,7 +63,7 @@ export default function TracksPage() {
           position: index + 1,
         })
       );
-      console.log({ newTracks });
+
       setTracks(newTracks);
       await updateTrackPosition(newTracks);
       refetch();
@@ -71,20 +73,18 @@ export default function TracksPage() {
   const handleAddTrack = async () => {
     if (!search.trim()) return;
 
-    const djId = session?.user.id;
-    if (!djId) {
+    const userId = session?.user.id;
+    if (!userId) {
       console.error('User ID is not available in the session.');
       return;
     }
 
     try {
-      const res = await addTracks({ title: search, djId });
-      //   console.log('Track added successfully:', res);
-      //   if (res && res.newTrack && ObjectId.isValid(res.newTrack.id)) {
+      const res = await addTracks({ title: search, userId });
+
       refetch();
       setSearch('');
       toast.success('Track added successfully');
-      // }
     } catch (error) {
       console.error('Error adding track:', error);
     }
@@ -98,21 +98,17 @@ export default function TracksPage() {
   );
 
   useEffect(() => {
-    if (tracksData) {
-      const typedTracksData = tracksData.map((item: any) => ({
+    if (commercialTracksData) {
+      const typedTracksData = commercialTracksData.map((item: any) => ({
         ...item,
-        position: item.position || 1, // Default to 1 if position is missing
-      })) as Track[];
+        position: item.position || 1,
+      })) as UserTrack[];
       setTracks(typedTracksData);
     }
-  }, [tracksData]);
+  }, [commercialTracksData, refetch]);
 
   if (status === 'loading' || trackLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <Loader2 className='h-8 w-8 animate-spin' />
-      </div>
-    );
+    return <Loading />;
   }
 
   const handleSavePlaylist = async () => {
@@ -140,7 +136,20 @@ export default function TracksPage() {
     }
   };
 
-  console.log({ tracksData, session });
+  const handleError = (): Array<boolean> | undefined => {
+    const errorArray = tracks?.map((item) => {
+      return (
+        item.artist === null ||
+        item.artist === '' ||
+        item?.track?.title === null ||
+        !item.mixes ||
+        item.mixes.length < 1
+      );
+    });
+    return errorArray ?? [];
+  };
+
+  const allTrue = handleError()?.every((value) => value === false) ?? true;
 
   if (!session) {
     return (
@@ -172,7 +181,7 @@ export default function TracksPage() {
           </Command>
 
           {search && (
-            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg'>
+            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-10'>
               <div className='p-2'>
                 <Button
                   variant='ghost'
@@ -192,14 +201,18 @@ export default function TracksPage() {
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <AllTracks tracks={tracks || []} refetch={refetch} />
+          <AllTracks
+            tracks={tracks || []}
+            refetch={refetch}
+            error={handleError}
+          />
         </DndContext>
 
         {tracks.length > 0 && (
           <Button
             className='w-full'
             onClick={handleSavePlaylist}
-            disabled={tracks.length !== 20 || isSaving}
+            disabled={tracks.length !== 20 || isSaving || !allTrue}
           >
             {isSaving ? (
               <>

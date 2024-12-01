@@ -25,72 +25,12 @@ model User {
   hashedPassword String?
   emailVerified  DateTime?
   image          String?
-  accounts       Account[]
-  sessions       Session[]
   role           UserRole?
   // Optional for WebAuthn support
-  Authenticator  Authenticator[]
-  tracks Track[]
+  upfrontTrack       UpfrontTrack[]  @relation("upfrontTrack")
+  commercialTrack       CommercialTrack[]  @relation("commercialTrack")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Account {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String  @db.ObjectId
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.String
-  access_token      String? @db.String
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.String
-  session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  sessionToken String   @unique
-  userId       String   @db.ObjectId
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model VerificationToken {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-// Optional for WebAuthn support
-model Authenticator {
-  credentialID         String  @id @map("_id")
-  userId               String  @db.ObjectId
-  providerAccountId    String
-  credentialPublicKey  String
-  counter              Int
-  credentialDeviceType String
-  credentialBackedUp   Boolean
-  transports           String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, credentialID])
 }
 
 
@@ -99,34 +39,87 @@ model Mix {
   title     String
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  tracks    MixTrack[]    @relation("MixTracks")
+  upfrontTracks    UpfrontMixTrack[]    @relation("MixTracks")
+  commercialTracks    CommercialMixTrack[]    @relation("MixTracks")
 }
 
-model Track {
+model Tracks {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
-  artist      String?
-  djId        String        @db.ObjectId
-  releaseDate DateTime?
-  isCustom    Boolean?
-  position    Int?
-  status      String?
+ 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  dj          User          @relation(fields: [djId], references: [id], onDelete: Cascade)
-  mixes       MixTrack[]    @relation("TrackMixes")
+
+  upfrontTrack       UpfrontTrack[]   @relation("userTracks")
+  commercial CommercialTrack[] @relation("userTracks")
+ 
+ 
 }
 
-model MixTrack {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  mixId     String   @db.ObjectId
-  trackId   String   @db.ObjectId
+model UpfrontTrack {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String   @db.ObjectId
+  trackId  String   @db.ObjectId
+  artist      String?
+  isExport   Boolean?
+  status      String?
+  position    Int?
+ 
+  user     User     @relation("upfrontTrack",fields: [userId], references: [id], onDelete: Cascade)
+  track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
+
+  mixes UpfrontMixTrack[] @relation("upfrontTrackMixes")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CommercialTrack {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String   @db.ObjectId
+  trackId  String   @db.ObjectId
+  artist      String?
+  isExport   Boolean?
+  status      String?
+  position    Int?
+ 
+  user     User     @relation("commercialTrack",fields: [userId], references: [id], onDelete: Cascade)
+  track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
+
+  mixes CommercialMixTrack[] @relation("commercialTrackMixes")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UpfrontMixTrack {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  mixId           String   @db.ObjectId
+  upfrontTrackId  String   @db.ObjectId
 
   mix       Mix      @relation("MixTracks", fields: [mixId], references: [id], onDelete: Cascade)
-  track     Track    @relation("TrackMixes", fields: [trackId], references: [id], onDelete: Cascade)
+  track     UpfrontTrack @relation("upfrontTrackMixes", fields: [upfrontTrackId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([mixId, trackId])
+  @@unique([mixId, upfrontTrackId])
+}
+
+
+
+model CommercialMixTrack {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  mixId     String   @db.ObjectId
+
+  commercialTrackId   String    @db.ObjectId
+
+  mix       Mix      @relation("MixTracks", fields: [mixId], references: [id], onDelete: Cascade)
+  track     CommercialTrack    @relation("commercialTrackMixes", fields: [commercialTrackId], references: [id], onDelete: Cascade)
+  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([mixId, commercialTrackId])
 }

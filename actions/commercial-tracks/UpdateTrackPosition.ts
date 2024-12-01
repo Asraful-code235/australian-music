@@ -1,13 +1,13 @@
 'use server';
 
 import { db } from '@/db';
-import { Track } from '@/types/track';
+import { UserTrack } from '@/types/track';
 
-export async function updateTrackPosition(items: Track[]) {
+export async function updateTrackPosition(items: UserTrack[]) {
   try {
     await db.$transaction(
-      items.map((item: Track) => {
-        return db.track.update({
+      items.map((item: UserTrack) => {
+        return db.commercialTrack.update({
           where: { id: item.id },
           data: { position: item.position },
         });

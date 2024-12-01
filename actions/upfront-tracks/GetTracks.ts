@@ -5,22 +5,11 @@ import { getErrorMessage } from '@/lib/utils';
 
 export async function getTracks(id: string | undefined) {
   try {
-    const tracks = await db.track.findMany({
-      where: { djId: id },
+    const tracks = await db.upfrontTrack.findMany({
+      where: { userId: id },
       orderBy: { position: 'asc' },
       include: {
-        dj: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            emailVerified: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
-            image: true,
-          },
-        },
+        track: true,
         mixes: {
           include: {
             mix: true,
@@ -28,6 +17,7 @@ export async function getTracks(id: string | undefined) {
         },
       },
     });
+
     return tracks;
   } catch (error) {
     throw new Error(getErrorMessage(error));

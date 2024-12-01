@@ -7,25 +7,25 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { GripVertical, Save, Edit, X } from 'lucide-react';
-import { Track } from '@/types/track';
+import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
-import {
-  updateTrack,
-  updateTrackWithMixes,
-} from '@/actions/tracks/UpdateTrack';
+
 import {
   QueryObserverResult,
   useInfiniteQuery,
   useQuery,
 } from '@tanstack/react-query';
-import { getMix } from '@/actions/tracks/GetMix';
+import { getMix } from '@/actions/shared/GetMix';
 import { MultiValue, ActionMeta } from 'react-select';
-import { addMix } from '@/actions/tracks/AddMix';
+import { addMix } from '@/actions/shared/AddMix';
 import Select from 'react-select/async-creatable';
+import { updateUpfrontTrackWithMixes } from '@/actions/upfront-tracks/UpdateTrack';
 
 interface TrackItemProps {
-  track: Track;
+  track: UserTrack;
   refetch?: () => Promise<QueryObserverResult>;
+  error: () => Array<boolean> | undefined;
+  index: number;
 }
 
 const useMixes = (search: string) => {
@@ -43,15 +43,22 @@ const useMixes = (search: string) => {
   });
 };
 
-export function TrackItem({ track, refetch }: TrackItemProps) {
+export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTrack, setEditedTrack] = useState(track);
+  const [isDragged, setIsDragged] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [trackTitle, setTrackTitle] = useState(track?.track?.title || '');
   const [selectedMixes, setSelectedMixes] = useState(
-    track.mixes?.map((item) => ({
-      label: item.mix.title,
-      value: item.mix.id,
-    })) || []
+    track?.mixes
+      ?.filter((item) => item?.mix?.title && item?.mix?.id)
+      .map((item) => ({
+        label: item.mix?.title || '',
+        value: item.mix?.id || '',
+      })) || []
   );
+
   const [allOptions, setAllOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -61,49 +68,20 @@ export function TrackItem({ track, refetch }: TrackItemProps) {
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: track.id });
-  console.log({ selectedMixes });
+
   const handleSave = async () => {
-    const updatedTrack: Track = {
-      ...editedTrack,
-      status: editedTrack.status || null,
-      djId: editedTrack.djId || '',
-      isCustom: editedTrack.isCustom || null,
-      position: editedTrack.position || null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Prepare the mixes payload
-    const mixesPayload = selectedMixes.map((mix) => ({
-      mixId: mix.value,
-      trackId: updatedTrack.id,
-    }));
-
-    console.log({ mixesPayload });
-
-    const payload = {
-      id: updatedTrack.id,
-      title: updatedTrack.title,
-      artist: updatedTrack.artist,
-      releaseDate: updatedTrack.releaseDate,
-      status: updatedTrack.status,
-      djId: updatedTrack.djId,
-      isCustom: updatedTrack.isCustom,
-      position: updatedTrack.position,
-      mixes: mixesPayload,
-      createdAt: updatedTrack.createdAt,
-      updatedAt: updatedTrack.updatedAt,
-    };
+    if (!editedTrack) return;
 
     setIsEditing(false);
 
     try {
-      // await updateTrack(payload);
-      await updateTrackWithMixes({
-        trackId: editedTrack.id,
-        mixIds: selectedMixes.map((item) => item.value),
-        title: updatedTrack.title,
-        artist: updatedTrack.artist !== null ? updatedTrack.artist : '',
+      if (!editedTrack) return;
+      await updateUpfrontTrackWithMixes({
+        upfrontId: editedTrack?.id,
+        trackId: editedTrack?.trackId || '',
+        mixIds: selectedMixes.map((item) => item.value || ''),
+        title: trackTitle || '',
+        artist: editedTrack?.artist !== null ? editedTrack?.artist : '',
       });
       if (refetch) {
         refetch();
@@ -115,10 +93,6 @@ export function TrackItem({ track, refetch }: TrackItemProps) {
       toast.error(errorMessage);
     }
   };
-
-  const [isDragged, setIsDragged] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -189,32 +163,21 @@ export function TrackItem({ track, refetch }: TrackItemProps) {
     }
   };
 
-  // const handleSave = async () => {
-  //   const payload = {
-  //     ...editedTrack,
-  //     mixes: selectedMixes.map((mix) => ({ id: mix.value, title: mix.label })),
-  //   };
-
-  //   setIsEditing(false);
-
-  //   try {
-  //     await updateTrack(payload);
-  //     if (refetch) {
-  //       refetch();
-  //     }
-  //     toast.success('Track updated');
-  //   } catch (e) {
-  //     const errorMessage =
-  //       e instanceof Error ? e.message : 'Something went wrong';
-  //     toast.error(errorMessage);
-  //   }
-  // };
+  const fieldError = (): boolean => {
+    const errors = error() || [];
+    return Array.isArray(errors) && errors.length > index
+      ? errors[index]
+      : false;
+  };
 
   return (
     <div
       style={style}
-      className='p-4 flex items-center gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
+      className='relative p-4 flex items-center gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
     >
+      {fieldError() && (
+        <div className='absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full'></div>
+      )}
       <div
         ref={setNodeRef}
         {...attributes}
@@ -231,16 +194,22 @@ export function TrackItem({ track, refetch }: TrackItemProps) {
           <div className='w-full flex gap-4'>
             <Input
               placeholder='Title'
-              value={editedTrack.title}
-              onChange={(e) =>
-                setEditedTrack({ ...editedTrack, title: e.target.value })
-              }
+              value={trackTitle}
+              onChange={(e) => setTrackTitle(e.target.value)}
             />
             <Input
               placeholder='Artist'
-              value={editedTrack.artist || ''}
+              value={editedTrack?.artist || ''}
               onChange={(e) =>
-                setEditedTrack({ ...editedTrack, artist: e.target.value })
+                setEditedTrack((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    artist: e.target.value,
+                    createdAt: prev.createdAt ?? new Date(),
+                    updatedAt: new Date(),
+                  };
+                })
               }
             />
           </div>
@@ -270,8 +239,8 @@ export function TrackItem({ track, refetch }: TrackItemProps) {
         </div>
       ) : (
         <div className='flex-1 grid grid-cols-3 gap-4'>
-          <span className='truncate'>{track.title}</span>
-          <span className='truncate'>{track.artist}</span>
+          <span className='truncate'>{track?.track?.title}</span>
+          <span className='truncate'>{track?.artist}</span>
           {/* <span>{track.releaseDate}</span> */}
         </div>
       )}
