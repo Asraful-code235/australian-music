@@ -9,13 +9,10 @@ export async function getTracks(id: string | undefined) {
       where: { userId: id },
       orderBy: { position: 'asc' },
       include: {
-        track: {
+        track: true, // Include the track details
+        mixes: {
           include: {
-            mixes: {
-              include: {
-                mix: true,
-              },
-            },
+            mix: true, // Include the mix details from UpfrontMixTrack
           },
         },
       },

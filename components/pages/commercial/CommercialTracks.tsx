@@ -21,14 +21,14 @@ import { Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
-import { getTracks } from '@/actions/upfront-tracks/GetTracks';
 
-import { addTracks } from '@/actions/upfront-tracks/AddTracks';
-import { updateTrackPosition } from '@/actions/upfront-tracks/UpdateTrackPosition';
-import AllTracks from '../shared/tracks/AllTracks';
-import Loading from '../shared/loading/Loading';
+import AllTracks from '../../shared/tracks/AllTracks';
+import Loading from '../../shared/loading/Loading';
+import { getTracks } from '@/actions/commercial-tracks/GetTracks';
+import { updateTrackPosition } from '@/actions/commercial-tracks/UpdateTrackPosition';
+import { addTracks } from '@/actions/commercial-tracks/AddCommercialTracks';
 
-export default function TracksPage() {
+export default function CommercialPage() {
   const { data: session, status } = useSession();
 
   const [tracks, setTracks] = useState<UserTrack[]>([]);
@@ -38,7 +38,7 @@ export default function TracksPage() {
 
   const {
     isLoading: trackLoading,
-    data: tracksData,
+    data: commercialTracksData,
     error: trackError,
     refetch,
   } = useQuery({
@@ -98,20 +98,18 @@ export default function TracksPage() {
   );
 
   useEffect(() => {
-    if (tracksData) {
-      const typedTracksData = tracksData.map((item: any) => ({
+    if (commercialTracksData) {
+      const typedTracksData = commercialTracksData.map((item: any) => ({
         ...item,
         position: item.position || 1,
       })) as UserTrack[];
       setTracks(typedTracksData);
     }
-  }, [tracksData, refetch]);
+  }, [commercialTracksData, refetch]);
 
   if (status === 'loading' || trackLoading) {
     return <Loading />;
   }
-
-  console.log({ tracksData });
 
   const handleSavePlaylist = async () => {
     if (!session) {

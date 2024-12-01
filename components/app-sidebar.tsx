@@ -24,8 +24,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
   const isAdmin = session?.user.role === 'ADMIN';
 
-  console.log('isAdmin', isAdmin);
-
   const data = {
     navMain: [
       {

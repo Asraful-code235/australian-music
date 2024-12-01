@@ -113,8 +113,6 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     };
   }, [isDragged, setNodeRef]);
 
-  console.log({ editedTrack });
-
   const handleDragStart = () => {
     setIsDragged(true);
     setIsFocused(true);
