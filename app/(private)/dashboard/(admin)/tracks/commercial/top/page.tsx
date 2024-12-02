@@ -1,3 +1,5 @@
+import CommercialTop from '@/components/pages/commercial/track/CommercialTop';
+
 export default function TopPage() {
-  return <div>page</div>;
+  return <CommercialTop />;
 }

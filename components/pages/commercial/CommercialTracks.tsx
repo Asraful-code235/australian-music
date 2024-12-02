@@ -22,13 +22,14 @@ import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
 
-import AllTracks from '../../shared/tracks/AllTracks';
+import AllTracks from '../tracks/AllTracks';
 import Loading from '../../shared/loading/Loading';
 import { getTracks } from '@/actions/commercial-tracks/GetTracks';
 import { updateTrackPosition } from '@/actions/commercial-tracks/UpdateTrackPosition';
 import { addTracks } from '@/actions/commercial-tracks/AddCommercialTracks';
 import { TracksLimit } from '@/lib/utils';
 import { updateTrackStatus } from '@/actions/commercial-tracks/UpdateCommercialStatus';
+import AllCommercialTracks from './AllCommercialTracks';
 
 export default function CommercialPage() {
   const { data: session, status } = useSession();
@@ -80,9 +81,9 @@ export default function CommercialPage() {
       console.error('User ID is not available in the session.');
       return;
     }
-
+    const position = tracks.length ? tracks.length + 1 : 1;
     try {
-      const res = await addTracks({ title: search, userId });
+      const res = await addTracks({ title: search, userId, position });
 
       refetch();
       setSearch('');
@@ -198,7 +199,7 @@ export default function CommercialPage() {
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <AllTracks
+          <AllCommercialTracks
             tracks={tracks || []}
             refetch={refetch}
             error={handleError}
@@ -209,14 +210,14 @@ export default function CommercialPage() {
           <Button
             className='w-full'
             onClick={handleSavePlaylist}
-            disabled={tracks.length !== TracksLimit || isSaving || !allTrue}
+            disabled={tracks.length < TracksLimit || isSaving || !allTrue}
           >
             {isSaving ? (
               <>
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 Saving...
               </>
-            ) : tracks.length === TracksLimit ? (
+            ) : tracks.length >= TracksLimit ? (
               'Save Playlist'
             ) : (
               `Add ${TracksLimit - tracks.length} more tracks`

@@ -25,7 +25,7 @@ import { getTracks } from '@/actions/upfront-tracks/GetTracks';
 
 import { addTracks } from '@/actions/upfront-tracks/AddTracks';
 import { updateTrackPosition } from '@/actions/upfront-tracks/UpdateTrackPosition';
-import AllTracks from '../../shared/tracks/AllTracks';
+import AllTracks from './AllTracks';
 import Loading from '../../shared/loading/Loading';
 import { updateTrackStatus } from '@/actions/upfront-tracks/UpdateUpfrontStatus';
 import { TracksLimit } from '@/lib/utils';

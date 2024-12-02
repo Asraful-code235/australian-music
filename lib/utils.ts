@@ -22,3 +22,24 @@ export const getErrorMessage = (error: unknown) => {
 };
 
 export const TracksLimit = 5;
+
+export function generateQueryString(params: any) {
+  const isEmpty = Object.values(params).every((value) => value === '');
+
+  if (isEmpty) {
+    return '';
+  }
+
+  const queryString = Object.entries(params)
+    // eslint-disable-next-line no-unused-vars
+    .filter(([key, value]) => value !== '')
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(
+          value as unknown as string
+        )}`
+    )
+    .join('&');
+
+  return `?${queryString}`;
+}

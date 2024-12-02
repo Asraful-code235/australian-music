@@ -10,7 +10,7 @@ export interface User {
   hashedPassword?: string | null;
   emailVerified?: Date | null;
   image?: string | null;
-  role?: UserRole | null;
+  role?: UserRole | null | undefined;
   users?: UserTrack[];
   createdAt: Date;
   updatedAt: Date;
@@ -28,9 +28,9 @@ export type Tracks = {
 export interface UserTrack {
   id: string;
   userId: string;
-  trackId: string;
+  trackId?: string;
   isExport?: boolean | null;
-  status?: string | null;
+  status?: boolean | null;
   position?: number | null;
   user?: User;
   track?: Tracks;
