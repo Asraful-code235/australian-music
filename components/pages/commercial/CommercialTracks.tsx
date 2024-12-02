@@ -27,6 +27,8 @@ import Loading from '../../shared/loading/Loading';
 import { getTracks } from '@/actions/commercial-tracks/GetTracks';
 import { updateTrackPosition } from '@/actions/commercial-tracks/UpdateTrackPosition';
 import { addTracks } from '@/actions/commercial-tracks/AddCommercialTracks';
+import { TracksLimit } from '@/lib/utils';
+import { updateTrackStatus } from '@/actions/commercial-tracks/UpdateCommercialStatus';
 
 export default function CommercialPage() {
   const { data: session, status } = useSession();
@@ -119,15 +121,10 @@ export default function CommercialPage() {
 
     setIsSaving(true);
     try {
-      const response = await fetch('/api/playlists', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ tracks }),
-      });
+      console.log({ tracks: tracks.slice(0, TracksLimit) });
 
-      if (!response.ok) throw new Error('Failed to save playlist');
+      await updateTrackStatus(tracks.slice(0, TracksLimit));
+      refetch();
       toast.success('Playlist saved successfully');
     } catch (error) {
       toast.error('Failed to save playlist');
@@ -212,17 +209,17 @@ export default function CommercialPage() {
           <Button
             className='w-full'
             onClick={handleSavePlaylist}
-            disabled={tracks.length !== 20 || isSaving || !allTrue}
+            disabled={tracks.length !== TracksLimit || isSaving || !allTrue}
           >
             {isSaving ? (
               <>
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 Saving...
               </>
-            ) : tracks.length === 20 ? (
+            ) : tracks.length === TracksLimit ? (
               'Save Playlist'
             ) : (
-              `Add ${20 - tracks.length} more tracks`
+              `Add ${TracksLimit - tracks.length} more tracks`
             )}
           </Button>
         )}

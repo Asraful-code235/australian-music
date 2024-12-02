@@ -23,6 +23,7 @@ export async function updateUpfrontTrackWithMixes({
     const track = await tx.upfrontTrack.findUnique({
       where: { id: upfrontId },
     });
+    console.log({ track });
     if (!track) {
       throw new Error(`Track with ID ${trackId} not found.`);
     }

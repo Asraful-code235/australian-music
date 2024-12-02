@@ -62,7 +62,7 @@ model UpfrontTrack {
   trackId  String   @db.ObjectId
   artist      String?
   isExport   Boolean?
-  status      String?
+  status      Boolean? @default(false)
   position    Int?
  
   user     User     @relation("upfrontTrack",fields: [userId], references: [id], onDelete: Cascade)
@@ -80,7 +80,7 @@ model CommercialTrack {
   trackId  String   @db.ObjectId
   artist      String?
   isExport   Boolean?
-  status      String?
+  status      Boolean? @default(false)
   position    Int?
  
   user     User     @relation("commercialTrack",fields: [userId], references: [id], onDelete: Cascade)

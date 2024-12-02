@@ -30,7 +30,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: 'Tracks',
-            url: '/dashboard/tracks/commercial/top-20',
+            url: '/dashboard/tracks/commercial/top',
           },
           {
             title: 'Gigs',
@@ -44,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: 'Tracks',
-            url: '/dashboard/tracks/upfront/top-20',
+            url: '/dashboard/tracks/upfront/top',
           },
           {
             title: 'Gigs',

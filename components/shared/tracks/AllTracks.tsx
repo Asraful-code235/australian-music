@@ -1,6 +1,5 @@
-import { CommercialTrackItem } from '@/components/pages/commercial/CommercialTrackItem';
 import { TrackItem } from '@/components/pages/tracks/TrackItem';
-import { Tracks, UserTrack } from '@/types/track';
+import { UserTrack } from '@/types/track';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -19,7 +18,7 @@ export default function AllTracks({ tracks, refetch, error }: AllTracksProps) {
       <div className='space-y-3'>
         {tracks && tracks.length > 0
           ? tracks.map((track, index) => (
-              <CommercialTrackItem
+              <TrackItem
                 key={track.id}
                 track={track}
                 refetch={refetch}

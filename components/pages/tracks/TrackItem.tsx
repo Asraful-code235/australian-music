@@ -188,7 +188,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       >
         <GripVertical className='h-5 w-5 text-gray-400' />
       </div>
-
+      <div className='text-xs text-gray-600'>{index + 1}.</div>
       {isEditing ? (
         <div className='flex-1 space-y-2'>
           <div className='w-full flex gap-4'>

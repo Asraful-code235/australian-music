@@ -20,3 +20,5 @@ export const getErrorMessage = (error: unknown) => {
 
   return message;
 };
+
+export const TracksLimit = 5;
