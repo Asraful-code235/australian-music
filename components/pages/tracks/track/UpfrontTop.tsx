@@ -27,6 +27,7 @@ export default function UpfrontTop() {
       { page: params.page, search: params.search },
     ],
     queryFn: () => fetchUpfrontTracks(queryString as string),
+    //@ts-ignore
     keepPreviousData: true,
   });
 
@@ -47,7 +48,7 @@ export default function UpfrontTop() {
     <div className='container mx-auto py-10'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold tracking-tight'>
-          Commercial Top Tracks
+          Upfront Top Tracks
         </h1>
       </div>
       <div className='my-4'>

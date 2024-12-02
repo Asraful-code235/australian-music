@@ -64,6 +64,7 @@ model UpfrontTrack {
   isExport   Boolean?
   status      Boolean? @default(false)
   position    Int?
+   orderIndex Int?
  
   user     User     @relation("upfrontTrack",fields: [userId], references: [id], onDelete: Cascade)
   track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
@@ -82,7 +83,7 @@ model CommercialTrack {
   isExport   Boolean?
   status      Boolean? @default(false)
   position    Int?
- 
+  orderIndex Int?
   user     User     @relation("commercialTrack",fields: [userId], references: [id], onDelete: Cascade)
   track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
 

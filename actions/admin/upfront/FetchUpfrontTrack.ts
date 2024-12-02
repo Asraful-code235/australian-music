@@ -36,10 +36,10 @@ export const fetchUpfrontTracks = async (data: string) => {
       take: limit,
       orderBy: [
         {
-          updatedAt: 'desc', // Order by updatedAt in descending order
+          orderIndex: 'asc',
         },
         {
-          position: 'asc', // Then order by position in ascending order
+          position: 'asc',
         },
       ],
       include: {

@@ -27,6 +27,7 @@ export default function CommercialTop() {
       { page: params.page, search: params.search },
     ],
     queryFn: () => fetchCommercialTracks(queryString as string),
+    //@ts-ignore
     keepPreviousData: true,
   });
 
