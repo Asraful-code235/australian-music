@@ -53,7 +53,7 @@ export default function UpfrontTop() {
       </div>
       <div className='my-4'>
         <Input
-          placeholder='Search by user name...'
+          placeholder='Search by DJ name...'
           defaultValue={params.search}
           onChange={(e) => debounced(e.target.value)}
           className='w-full max-w-md'
