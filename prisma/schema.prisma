@@ -18,6 +18,11 @@ enum UserRole {
   USER
 }
 
+enum hasPlayed {
+  yes
+  no
+}
+
 model User {
   id             String          @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
@@ -29,6 +34,7 @@ model User {
   // Optional for WebAuthn support
   upfrontTrack       UpfrontTrack[]  @relation("upfrontTrack")
   commercialTrack       CommercialTrack[]  @relation("commercialTrack")
+  CommercialGigs      CommercialGigs[] @relation("CommercialGigs")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -61,6 +67,7 @@ model UpfrontTrack {
   userId   String   @db.ObjectId
   trackId  String   @db.ObjectId
   artist      String?
+  label String?
   isExport   Boolean?
   status      Boolean? @default(false)
   position    Int?
@@ -80,6 +87,7 @@ model CommercialTrack {
   userId   String   @db.ObjectId
   trackId  String   @db.ObjectId
   artist      String?
+  label     String?
   isExport   Boolean?
   status      Boolean? @default(false)
   position    Int?
@@ -123,4 +131,17 @@ model CommercialMixTrack {
   updatedAt DateTime @updatedAt
 
   @@unique([mixId, commercialTrackId])
+}
+
+model CommercialGigs {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  clubName  String
+  dayOfGig DateTime
+  startDate String
+  endDate  String
+  hasPlayed hasPlayed? @default(no)
+  user      User     @relation("CommercialGigs", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

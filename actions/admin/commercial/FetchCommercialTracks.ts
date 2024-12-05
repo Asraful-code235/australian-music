@@ -1,12 +1,13 @@
 'use server';
 
 import { db } from '@/db';
+import { TracksLimit } from '@/lib/utils';
 
 export const fetchCommercialTracks = async (data: string) => {
   const params = new URLSearchParams(data);
   const search = params.get('search') || '';
   const page = parseInt(params.get('page') ?? '1') || 1;
-  const limit = 10;
+  const limit = TracksLimit * 2;
 
   try {
     const count = await db.commercialTrack.count({

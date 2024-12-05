@@ -38,6 +38,7 @@ export interface UserTrack {
   userId: string;
   trackId?: string;
   isExport?: boolean | null;
+  label?: string | null;
   status?: boolean | null;
   position?: number | null;
   user?: User;

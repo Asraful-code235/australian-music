@@ -23,6 +23,8 @@ import { getMix } from '@/actions/shared/GetMix';
 
 import { addMix } from '@/actions/shared/AddMix';
 import { updateUpfrontTrackWithMixes } from '@/actions/commercial-tracks/UpdateTracks';
+import { TfiTrash } from 'react-icons/tfi';
+import { deleteCommercialTrack } from '@/actions/commercial-tracks/DeleteCommercialTrack';
 
 interface CommercialTrackItemProps {
   track: UserTrack;
@@ -87,6 +89,7 @@ export function CommercialTrackItem({
       await updateUpfrontTrackWithMixes({
         commercialId: editedTrack?.id,
         trackId: editedTrack?.trackId || '',
+        label: editedTrack?.label || '',
         mixIds: selectedMixes.map((item) => item.value || ''),
         title: trackTitle || '',
         artist: editedTrack?.artist !== null ? editedTrack?.artist : '',
@@ -95,6 +98,20 @@ export function CommercialTrackItem({
         refetch();
       }
       toast.success('Track updated');
+    } catch (e) {
+      const errorMessage =
+        e instanceof Error ? e.message : 'Something went wrong';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteCommercialTrack(track.id);
+      if (refetch) {
+        refetch();
+      }
+      toast.success('Track deleted');
     } catch (e) {
       const errorMessage =
         e instanceof Error ? e.message : 'Something went wrong';
@@ -222,6 +239,23 @@ export function CommercialTrackItem({
             />
           </div>
           <div>
+            <Input
+              placeholder='Label'
+              value={editedTrack?.label || ''}
+              onChange={(e) =>
+                setEditedTrack((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    label: e.target.value,
+                    createdAt: prev.createdAt ?? new Date(),
+                    updatedAt: new Date(),
+                  };
+                })
+              }
+            />
+          </div>
+          <div>
             <Select
               isMulti
               cacheOptions
@@ -292,14 +326,14 @@ export function CommercialTrackItem({
         </div>
       )}
 
-      <div className='flex gap-2'>
+      <div className='flex gap-1'>
         {isEditing ? (
           <>
             <Button size='icon' variant='ghost' onClick={handleSave}>
               <Save className='h-4 w-4' />
             </Button>
             <Button
-              className='z-[9999]'
+              className='z-10'
               size='icon'
               variant='ghost'
               onClick={() => setIsEditing(false)}
@@ -308,14 +342,24 @@ export function CommercialTrackItem({
             </Button>
           </>
         ) : (
-          <Button
-            className='z-[9999]'
-            size='icon'
-            variant='ghost'
-            onClick={() => setIsEditing(true)}
-          >
-            <Edit className='h-4 w-4' />
-          </Button>
+          <>
+            <Button
+              className='z-10'
+              size='icon'
+              variant='ghost'
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className='h-4 w-4' />
+            </Button>
+            <Button
+              className='z-10'
+              size='icon'
+              variant='ghost'
+              onClick={handleDelete}
+            >
+              <TfiTrash />
+            </Button>
+          </>
         )}
       </div>
     </div>

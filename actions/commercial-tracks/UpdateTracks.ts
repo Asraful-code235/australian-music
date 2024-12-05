@@ -8,6 +8,7 @@ type UpdateUpfrontMixParams = {
   title?: string;
   artist?: string;
   mixIds?: string[];
+  label?: string;
 };
 
 export async function updateUpfrontTrackWithMixes({
@@ -16,6 +17,7 @@ export async function updateUpfrontTrackWithMixes({
   title,
   artist,
   mixIds,
+  label,
 }: UpdateUpfrontMixParams) {
   return await db.$transaction(async (tx) => {
     const track = await tx.commercialTrack.findUnique({
@@ -40,6 +42,7 @@ export async function updateUpfrontTrackWithMixes({
         where: { id: commercialId },
         data: {
           artist,
+          label,
         },
       });
     }

@@ -30,6 +30,9 @@ import { addTracks } from '@/actions/commercial-tracks/AddCommercialTracks';
 import { TracksLimit } from '@/lib/utils';
 import { updateTrackStatus } from '@/actions/commercial-tracks/UpdateCommercialStatus';
 import AllCommercialTracks from './AllCommercialTracks';
+import { useDebouncedCallback } from 'use-debounce';
+import { SearchTrack } from '@/actions/shared/SearchTrack';
+import { addSearchedTrack } from '@/actions/commercial-tracks/AddSearchedTrack';
 
 export default function CommercialPage() {
   const { data: session, status } = useSession();
@@ -38,6 +41,7 @@ export default function CommercialPage() {
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState([]);
+  const [searchResult, setSearchResult] = useState<Tracks[]>([]);
 
   const {
     isLoading: trackLoading,
@@ -110,6 +114,45 @@ export default function CommercialPage() {
     }
   }, [commercialTracksData, refetch]);
 
+  const handleSearch = useDebouncedCallback(async (value: string) => {
+    console.log('Search term:', value);
+    const result = await SearchTrack(value);
+    setSearchResult(result);
+    console.log({ result });
+  }, 500);
+
+  const handleInputChange = (value: string) => {
+    setSearch(value);
+    handleSearch(value);
+  };
+
+  const handleSearchAndAdd = async (value: Tracks) => {
+    console.log({ value });
+    setSearch(value.title);
+
+    if (!search.trim()) return;
+
+    const userId = session?.user.id;
+    if (!userId) {
+      console.error('User ID is not available in the session.');
+      return;
+    }
+    const position = tracks.length ? tracks.length + 1 : 1;
+    try {
+      const res = await addSearchedTrack({
+        trackId: value.id,
+        userId,
+        position,
+      });
+
+      refetch();
+      setSearch('');
+      toast.success('Track added successfully');
+    } catch (error) {
+      console.error('Error adding track:', error);
+    }
+  };
+
   if (status === 'loading' || trackLoading) {
     return <Loading />;
   }
@@ -161,7 +204,7 @@ export default function CommercialPage() {
   }
 
   return (
-    <div className='max-w-3xl mx-auto p-6 space-y-6'>
+    <div className='max-w-3xl mx-auto p-1 lg:p-6 space-y-6'>
       <div className='flex flex-col space-y-4'>
         <h1 className='text-3xl font-bold'>Create Your Top 20 Tracks</h1>
 
@@ -172,24 +215,39 @@ export default function CommercialPage() {
               <Input
                 placeholder='Search or create a track...'
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleInputChange(e.target.value)}
                 className='flex h-11 w-full border-none shadow-none focus-none  focus-visible:ring-0'
               />
             </div>
           </Command>
 
           {search && (
-            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-10'>
-              <div className='p-2'>
-                <Button
-                  variant='ghost'
-                  className='w-full justify-start'
-                  onClick={handleAddTrack}
-                >
-                  <Plus className='mr-2 h-4 w-4' />
-                  Create &quot;{search}&quot;
-                </Button>
+            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-[9999] max-h-[250px] overflow-y-auto'>
+              <div>
+                {searchResult.map((track) => {
+                  return (
+                    <div
+                      key={track.id}
+                      className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
+                      onClick={() => handleSearchAndAdd(track)}
+                    >
+                      {track.title}
+                    </div>
+                  );
+                })}
               </div>
+              {searchResult.length < 1 && (
+                <div className='p-2'>
+                  <Button
+                    variant='ghost'
+                    className='w-full justify-start'
+                    onClick={handleAddTrack}
+                  >
+                    <Plus className='mr-2 h-4 w-4' />
+                    Create &quot;{search}&quot;
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
