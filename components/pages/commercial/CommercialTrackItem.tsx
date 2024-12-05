@@ -196,7 +196,7 @@ export function CommercialTrackItem({
       >
         <GripVertical className='h-5 w-5 text-gray-400' />
       </div>
-
+      <div className='text-xs text-gray-600'>{index + 1}.</div>
       {isEditing ? (
         <div className='flex-1 space-y-2'>
           <div className='w-full flex gap-4'>
@@ -242,6 +242,45 @@ export function CommercialTrackItem({
               }}
               placeholder='Search or create mixes'
               className='w-full'
+              styles={{
+                control: (provided, state) => ({
+                  ...provided,
+                  height: '2.25rem',
+                  borderRadius: '0.375rem',
+                  border: state.isFocused
+                    ? '1px solid #5b6371'
+                    : '1px solid #D1D5DB',
+                  backgroundColor: 'transparent',
+                  fontSize: '0.875rem',
+                  boxShadow: ' 0 1px 2px 0 rgb(0 0 0 / 0.05);',
+                  '&:hover': {
+                    borderColor: state.isFocused ? '#9CA3AF' : '#D1D5DB', // Prevent hover effect when focused
+                  },
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  padding: '',
+
+                  fontSize: '16px',
+                }),
+                placeholder: (provided) => ({
+                  ...provided,
+                  color: '#9CA3AF',
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: '#1F2937',
+                }),
+                option: (provided, state) => ({
+                  ...provided,
+                  backgroundColor: state.isSelected ? '#6B7280' : 'transparent',
+                  color: state.isSelected ? '#FFFFFF' : '#1F2937',
+                  '&:hover': {
+                    backgroundColor: '#6B7280',
+                    color: '#FFFFFF',
+                  },
+                }),
+              }}
             />
           </div>
         </div>

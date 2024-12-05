@@ -25,6 +25,14 @@ export type Tracks = {
   user?: UserTrack[];
 };
 
+export type PaginatedTracks = {
+  data: UserTrack[];
+  count: number;
+  limit: number;
+  page: number;
+  totalPages: number;
+};
+
 export interface UserTrack {
   id: string;
   userId: string;
@@ -51,7 +59,7 @@ export interface Mix {
 export interface MixTrack {
   id: string;
   mixId: string;
-  trackId: string;
+  trackId?: string;
   mix?: Mix;
   track?: Tracks;
   createdAt: Date;

@@ -63,7 +63,7 @@ export default function TracksTable({
   return isLoading ? (
     'Loading...'
   ) : (
-    <div>
+    <div className='mt-8'>
       <Table>
         <TableHeader>
           <TableRow>

@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { TfiTrash } from 'react-icons/tfi';
 
 type Period = 'all' | 'one_week' | 'one_month' | 'six_month';
 
@@ -22,13 +23,16 @@ export default function DeleteTrackSelect({
   const [selectedValue, setSelectedValue] = useState<Period>('all');
 
   return (
-    <div className='flex gap-2'>
-      <Button onClick={() => onDelete(selectedValue)}>Delete</Button>
+    <div className='flex gap-2 w-full'>
+      <Button onClick={() => onDelete(selectedValue)}>
+        <TfiTrash />
+        Delete
+      </Button>
       <Select
         value={selectedValue}
         onValueChange={(value) => setSelectedValue(value as Period)}
       >
-        <SelectTrigger className='min-w-[150px]'>
+        <SelectTrigger className='w-full lg:w-[150px]'>
           <SelectValue placeholder='All' />
         </SelectTrigger>
         <SelectContent>

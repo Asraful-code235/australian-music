@@ -7,20 +7,12 @@ import NoDataFound from '@/components/shared/no-data-found';
 import TracksTable from '@/components/shared/tracks-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { generateQueryString } from '@/lib/utils';
+import { exportToCSV, generateQueryString } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import { GoDownload } from 'react-icons/go';
 
 export default function CommercialTop() {
   const router = useRouter();
@@ -80,20 +72,29 @@ export default function CommercialTop() {
             placeholder='Search by DJ name...'
             defaultValue={params.search}
             onChange={(e) => debounced(e.target.value)}
-            className='w-full max-w-md'
+            className='w-full lg:w-2/6'
           />
-          <DeleteTrackSelect onDelete={handleDelete} />
+          <div className='flex gap-2'>
+            <Button
+              variant='outline'
+              onClick={() =>
+                exportToCSV(commercialData, 'commercial-track.csv')
+              }
+            >
+              <GoDownload />
+              <span className='hidden lg:block'>Export to CSV</span>
+            </Button>
+            <DeleteTrackSelect onDelete={handleDelete} />
+          </div>
         </div>
       </div>
 
-      <div className='mt-4'>
-        <TracksTable
-          data={commercialData}
-          isLoading={isLoading}
-          params={params}
-          setParams={setParams}
-        />
-      </div>
+      <TracksTable
+        data={commercialData}
+        isLoading={isLoading}
+        params={params}
+        setParams={setParams}
+      />
     </div>
   ) : (
     <NoDataFound />

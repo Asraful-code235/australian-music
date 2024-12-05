@@ -71,9 +71,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Commercial Top 20',
             url: '/dashboard/commercial/top',
           },
+
           {
-            title: 'Commercial Gigs',
-            url: '/dashboard/commercial/gigs',
+            title: 'Upfront Top 20',
+            url: '/dashboard/upfront/top ',
           },
         ],
       },
@@ -82,8 +83,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: '#',
         items: [
           {
-            title: 'Upfront Top 20',
-            url: '/dashboard/upfront/top ',
+            title: 'Commercial Gigs',
+            url: '/dashboard/commercial/gigs',
           },
           {
             title: 'Upfront Gigs',

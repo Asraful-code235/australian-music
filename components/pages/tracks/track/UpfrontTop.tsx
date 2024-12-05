@@ -5,12 +5,14 @@ import { fetchUpfrontTracks } from '@/actions/admin/upfront/FetchUpfrontTrack';
 import DeleteTrackSelect from '@/components/shared/delete-track-select';
 import NoDataFound from '@/components/shared/no-data-found';
 import TracksTable from '@/components/shared/tracks-table';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { generateQueryString } from '@/lib/utils';
+import { exportToCSV, generateQueryString } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { GoDownload } from 'react-icons/go';
 import { useDebouncedCallback } from 'use-debounce';
 
 export default function UpfrontTop() {
@@ -60,7 +62,7 @@ export default function UpfrontTop() {
   };
 
   console.log({ upfrontData, searchParams, isLoading });
-  return upfrontData && upfrontData.count > 0 ? (
+  return upfrontData && upfrontData.data.length > 0 ? (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
@@ -73,9 +75,18 @@ export default function UpfrontTop() {
             placeholder='Search by DJ name...'
             defaultValue={params.search}
             onChange={(e) => debounced(e.target.value)}
-            className='w-full max-w-md'
+            className='w-full lg:w-2/6'
           />
-          <DeleteTrackSelect onDelete={handleDelete} />
+          <div className='flex gap-2'>
+            <Button
+              variant='outline'
+              onClick={() => exportToCSV(upfrontData, 'upfront-track.csv')}
+            >
+              <GoDownload />
+              <span className='hidden lg:block'>Export to CSV</span>
+            </Button>
+            <DeleteTrackSelect onDelete={handleDelete} />
+          </div>
         </div>
       </div>
 

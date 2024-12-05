@@ -1,4 +1,6 @@
+import { PaginatedTracks, UserTrack } from '@/types/track';
 import { clsx, type ClassValue } from 'clsx';
+import dayjs from 'dayjs';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -43,3 +45,45 @@ export function generateQueryString(params: any) {
 
   return `?${queryString}`;
 }
+
+export const exportToCSV = (data: PaginatedTracks, filename: string) => {
+  if (!data || !data.data) return;
+
+  const headers = [
+    'Artist',
+    'Position',
+    'Created At',
+    'Updated At',
+    'User Name',
+    'User Email',
+    'Track Title',
+    'Mix Titles',
+  ].join(',');
+
+  const rows = data.data.map((item: UserTrack) => {
+    const mixTitles =
+      item.mixes?.map((mix) => mix?.mix?.title)?.join('; ') || '';
+    return [
+      item.position,
+      item.artist,
+      dayjs(item.createdAt).format('DD-MM-YYYY'),
+      dayjs(item.updatedAt).format('DD-MM-YYYY'),
+      item.user?.name,
+      item.user?.email,
+      item.track?.title,
+      mixTitles,
+    ]
+      .map((value) => `"${value || ''}"`)
+      .join(',');
+  });
+
+  const csvContent = `${headers}\n${rows.join('\n')}`;
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+};
