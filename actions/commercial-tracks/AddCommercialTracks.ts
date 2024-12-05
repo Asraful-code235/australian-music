@@ -5,9 +5,10 @@ import { db } from '@/db';
 type Tracks = {
   title: string;
   userId: string;
+  position: number;
 };
 
-export async function addTracks({ title, userId }: Tracks) {
+export async function addTracks({ title, userId, position }: Tracks) {
   try {
     const newTrack = await db.tracks.create({
       data: {
@@ -19,6 +20,7 @@ export async function addTracks({ title, userId }: Tracks) {
       data: {
         trackId: newTrack.id,
         userId,
+        position,
       },
     });
 

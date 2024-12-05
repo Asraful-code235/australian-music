@@ -16,9 +16,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { useSession } from 'next-auth/react';
-// import { auth } from "@/auth";
-
-// This is sample data.
+import Link from 'next/link';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
@@ -32,11 +30,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: 'Tracks',
-            url: '#',
+            url: '/dashboard/tracks/commercial/top',
           },
           {
             title: 'Gigs',
-            url: '#',
+            url: '/dashboard/tracks/commercial/gigs',
           },
         ],
       },
@@ -46,11 +44,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: 'Tracks',
-            url: '#',
+            url: '/dashboard/tracks/upfront/top',
           },
           {
             title: 'Gigs',
-            url: '#',
+            url: '/dashboard/tracks/upfront/gigs',
             isActive: true,
           },
         ],
@@ -71,11 +69,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: 'Commercial Top 20',
-            url: '/dashboard/tracks/top',
+            url: '/dashboard/commercial/top',
           },
+
           {
-            title: 'Commercial Gigs',
-            url: '/dashboard/tracks/gigs',
+            title: 'Upfront Top 20',
+            url: '/dashboard/upfront/top ',
           },
         ],
       },
@@ -84,12 +83,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: '#',
         items: [
           {
-            title: 'Upfront Top 20',
-            url: '#',
+            title: 'Commercial Gigs',
+            url: '/dashboard/commercial/gigs',
           },
           {
             title: 'Upfront Gigs',
-            url: '#',
+            url: '/dashboard/upfront/gigs',
           },
         ],
       },
@@ -136,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     {item.items.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
                         <SidebarMenuSubButton asChild isActive={item.isActive}>
-                          <a href={item.url}>{item.title}</a>
+                          <Link href={item.url}>{item.title}</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}

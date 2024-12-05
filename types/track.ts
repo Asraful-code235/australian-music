@@ -10,7 +10,7 @@ export interface User {
   hashedPassword?: string | null;
   emailVerified?: Date | null;
   image?: string | null;
-  role?: UserRole | null;
+  role?: UserRole | null | undefined;
   users?: UserTrack[];
   createdAt: Date;
   updatedAt: Date;
@@ -25,12 +25,21 @@ export type Tracks = {
   user?: UserTrack[];
 };
 
+export type PaginatedTracks = {
+  data: UserTrack[];
+  count: number;
+  limit: number;
+  page: number;
+  totalPages: number;
+};
+
 export interface UserTrack {
   id: string;
   userId: string;
-  trackId: string;
+  trackId?: string;
   isExport?: boolean | null;
-  status?: string | null;
+  label?: string | null;
+  status?: boolean | null;
   position?: number | null;
   user?: User;
   track?: Tracks;
@@ -51,7 +60,7 @@ export interface Mix {
 export interface MixTrack {
   id: string;
   mixId: string;
-  trackId: string;
+  trackId?: string;
   mix?: Mix;
   track?: Tracks;
   createdAt: Date;
@@ -76,3 +85,25 @@ export interface CreateMixTrackInput {
   mixId: string;
   trackId: string;
 }
+
+export type GigsData = {
+  clubName: string;
+  dayOfGig: Date;
+  startDate: string;
+  endDate: string;
+  user: User;
+  createdAt: Date;
+  updatedAt: Date;
+  id: string;
+  isExport: boolean;
+  hasPlayed: 'yes' | 'no';
+  userId: string;
+};
+
+export type GigsDataResponse = {
+  count: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  data: GigsData[];
+};
