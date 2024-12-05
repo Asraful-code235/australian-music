@@ -93,34 +93,36 @@ export default function TracksTable({
           ))}
         </TableBody>
       </Table>
-      <div className='flex items-center justify-end space-x-2 py-4'>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() =>
-            setParams({
-              ...params,
-              page: (parseInt(params.page) - 1).toString(),
-            })
-          }
-          disabled={+params.page <= 1}
-        >
-          Previous
-        </Button>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() =>
-            setParams({
-              ...params,
-              page: (parseInt(params.page) + 1).toString(),
-            })
-          }
-          disabled={+params.page >= data.totalPages}
-        >
-          Next
-        </Button>
-      </div>
+      {data.totalPages > 1 && (
+        <div className='flex items-center justify-end space-x-2 py-4'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() =>
+              setParams({
+                ...params,
+                page: (parseInt(params.page) - 1).toString(),
+              })
+            }
+            disabled={+params.page <= 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() =>
+              setParams({
+                ...params,
+                page: (parseInt(params.page) + 1).toString(),
+              })
+            }
+            disabled={+params.page >= data.totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

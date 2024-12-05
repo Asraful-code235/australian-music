@@ -63,8 +63,6 @@ export const fetchUpfrontTracks = async (data: string) => {
       },
     });
 
-    console.log({ search, page, limit, totalPages, upfrontTracks });
-
     return {
       count,
       page,

@@ -63,8 +63,6 @@ export const fetchCommercialTracks = async (data: string) => {
       },
     });
 
-    console.log({ search, page, limit, totalPages, commercialTracks });
-
     return {
       count,
       page,
