@@ -73,7 +73,6 @@ export default function TracksPage() {
   };
 
   const handleAddTrack = async () => {
-    console.log({ insideTrack: tracks });
     if (!search.trim()) return;
 
     const userId = session?.user.id;
@@ -128,8 +127,6 @@ export default function TracksPage() {
 
     setIsSaving(true);
     try {
-      console.log({ tracks: tracks.slice(0, TracksLimit) });
-
       await updateTrackStatus(tracks.slice(0, TracksLimit));
       refetch();
       toast.success('Playlist saved successfully');

@@ -1,4 +1,9 @@
-import { PaginatedTracks, UserTrack } from '@/types/track';
+import {
+  GigsData,
+  GigsDataResponse,
+  PaginatedTracks,
+  UserTrack,
+} from '@/types/track';
 import { clsx, type ClassValue } from 'clsx';
 import dayjs from 'dayjs';
 import { twMerge } from 'tailwind-merge';
@@ -72,6 +77,42 @@ export const exportToCSV = (data: PaginatedTracks, filename: string) => {
       item.user?.email,
       item.track?.title,
       mixTitles,
+    ]
+      .map((value) => `"${value || ''}"`)
+      .join(',');
+  });
+
+  const csvContent = `${headers}\n${rows.join('\n')}`;
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+export const gigsCsv = (data: GigsDataResponse, filename: string) => {
+  if (!data || !data.data) return;
+
+  const headers = [
+    'DJ Name',
+    'Club Name',
+    'Day',
+    'Time Slot',
+    'Has Played',
+    'Created At',
+  ].join(',');
+
+  const rows = data.data.map((item: GigsData) => {
+    return [
+      item.user?.name,
+      item.clubName,
+      dayjs(item.dayOfGig).format('dddd'),
+      item.startDate + '-' + item.startDate,
+      item.hasPlayed === 'yes' ? 'Yes' : 'No',
+      dayjs(item.createdAt).format('DD-MM-YYYY'),
     ]
       .map((value) => `"${value || ''}"`)
       .join(',');

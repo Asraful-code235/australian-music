@@ -10,6 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
+import { GigsData } from '@/types/track';
+import dayjs from 'dayjs';
 
 export type UserTrack = {
   id?: string;
@@ -40,7 +42,7 @@ export type UserTrack = {
 
 type TrackTableProps = {
   data: {
-    data: UserTrack[];
+    data: GigsData[];
     count: number;
     limit: number;
     page: number;
@@ -54,7 +56,7 @@ type TrackTableProps = {
   setParams: (params: { search: string; page: string }) => void;
 };
 
-export default function TracksTable({
+export default function GigsTable({
   data,
   isLoading,
   params,
@@ -68,26 +70,25 @@ export default function TracksTable({
         <TableHeader>
           <TableRow>
             <TableHead className='w-[100px]'>Serial no.</TableHead>
-            <TableHead className='w-[200px]'>Chart Position</TableHead>
             <TableHead>DJ Name</TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Artist</TableHead>
-            <TableHead>Mix</TableHead>
+            <TableHead>Club Name</TableHead>
+            <TableHead>Day</TableHead>
+            <TableHead>Time Slot</TableHead>
+            <TableHead className='text-center'>Has Played</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.data.map((items, index) => (
             <TableRow key={items.id}>
               <TableCell>{index + 1}</TableCell>
-              <TableCell>{items.position}</TableCell>
               <TableCell>{items.user?.name}</TableCell>
-              <TableCell>{items.track?.title}</TableCell>
-              <TableCell>{items.artist}</TableCell>
+              <TableCell>{items.clubName}</TableCell>
+              <TableCell>{dayjs(items.dayOfGig).format('dddd')}</TableCell>
               <TableCell>
-                {items.mixes
-                  ?.map((item) => item?.mix?.title)
-                  .filter(Boolean)
-                  .join(', ')}
+                {items.startDate}-{items.startDate}
+              </TableCell>
+              <TableCell className='text-center'>
+                {items.hasPlayed === 'yes' ? 'Yes' : 'No'}
               </TableCell>
             </TableRow>
           ))}

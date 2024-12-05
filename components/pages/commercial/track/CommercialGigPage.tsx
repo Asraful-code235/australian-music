@@ -1,21 +1,19 @@
 'use client';
 
-import { deleteUpfrontTracks } from '@/actions/admin/upfront/DeleteUpfrontTracks';
-import { fetchUpfrontTracks } from '@/actions/admin/upfront/FetchUpfrontTrack';
-import DeleteTrackSelect from '@/components/shared/delete-track-select';
-import NoDataFound from '@/components/shared/no-data-found';
-import TracksTable from '@/components/shared/tracks-table';
+import { FetchCommercialGigs } from '@/actions/gigs/commercial/FetchCommercialGig';
+import { updateCommercialGigExportStatus } from '@/actions/gigs/commercial/UpdateCommercialGigExpStatus';
+import GigsTable from '@/components/shared/gigs-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { exportToCSV, generateQueryString } from '@/lib/utils';
+import { generateQueryString, gigsCsv } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { GoDownload } from 'react-icons/go';
 import { useDebouncedCallback } from 'use-debounce';
 
-export default function UpfrontTop() {
+export default function CommercialGigPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -27,7 +25,7 @@ export default function UpfrontTop() {
   const queryString = generateQueryString(params);
 
   const {
-    data: upfrontData,
+    data: commercialGigsData,
     isLoading,
     refetch,
   } = useQuery({
@@ -35,7 +33,7 @@ export default function UpfrontTop() {
       `track/commercial${queryString}`,
       { page: params.page, search: params.search },
     ],
-    queryFn: () => fetchUpfrontTracks(queryString as string),
+    queryFn: () => FetchCommercialGigs(queryString as string),
     //@ts-ignore
     keepPreviousData: true,
   });
@@ -52,10 +50,14 @@ export default function UpfrontTop() {
     router.push(queryString);
   }, [queryString, router]);
 
-  const handleDelete = async (
-    value: 'all' | 'one_week' | 'one_month' | 'six_month'
-  ) => {
-    await deleteUpfrontTracks(value);
+  const handleExport = async () => {
+    if (!commercialGigsData?.data || commercialGigsData?.data.length === 0)
+      return;
+
+    gigsCsv(commercialGigsData, 'commercial-gig.csv');
+
+    const ids = commercialGigsData.data.map((gig: { id: string }) => gig.id);
+    await updateCommercialGigExportStatus(ids);
     refetch();
   };
 
@@ -63,13 +65,11 @@ export default function UpfrontTop() {
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
-          <h1 className='text-3xl font-bold tracking-tight'>
-            Upfront Top Tracks
-          </h1>
+          <h1 className='text-3xl font-bold tracking-tight'>Commercial Gigs</h1>
         </div>
         <div className='flex lg:flex-row flex-col justify-between gap-3'>
           <Input
-            placeholder='Search by DJ name...'
+            placeholder='Search by DJ name or Club name'
             defaultValue={params.search}
             onChange={(e) => debounced(e.target.value)}
             className='w-full lg:w-2/6'
@@ -77,28 +77,22 @@ export default function UpfrontTop() {
           <div className='flex gap-2'>
             <Button
               variant='outline'
-              onClick={() => exportToCSV(upfrontData, 'upfront-track.csv')}
-              disabled={upfrontData?.data.length === 0}
+              disabled={commercialGigsData?.data.length === 0}
+              onClick={handleExport}
             >
               <GoDownload />
               <span className='hidden lg:block'>Export to CSV</span>
             </Button>
-            <DeleteTrackSelect
-              onDelete={handleDelete}
-              disabled={upfrontData?.data.length === 0}
-            />
           </div>
         </div>
       </div>
 
-      <div className='mt-4'>
-        <TracksTable
-          data={upfrontData}
-          isLoading={isLoading}
-          params={params}
-          setParams={setParams}
-        />
-      </div>
+      <GigsTable
+        data={commercialGigsData}
+        isLoading={isLoading}
+        params={params}
+        setParams={setParams}
+      />
     </div>
   );
 }

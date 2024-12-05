@@ -54,12 +54,11 @@ export default function CommercialTop() {
   const handleDelete = async (
     value: 'all' | 'one_week' | 'one_month' | 'six_month'
   ) => {
-    console.log(value);
     await deleteCommercialTracks(value);
     refetch();
   };
 
-  return commercialData && commercialData.data.length > 0 ? (
+  return (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
@@ -77,6 +76,7 @@ export default function CommercialTop() {
           <div className='flex gap-2'>
             <Button
               variant='outline'
+              disabled={commercialData?.data.length === 0}
               onClick={() =>
                 exportToCSV(commercialData, 'commercial-track.csv')
               }
@@ -84,7 +84,10 @@ export default function CommercialTop() {
               <GoDownload />
               <span className='hidden lg:block'>Export to CSV</span>
             </Button>
-            <DeleteTrackSelect onDelete={handleDelete} />
+            <DeleteTrackSelect
+              onDelete={handleDelete}
+              disabled={commercialData?.data.length === 0}
+            />
           </div>
         </div>
       </div>
@@ -96,7 +99,5 @@ export default function CommercialTop() {
         setParams={setParams}
       />
     </div>
-  ) : (
-    <NoDataFound />
   );
 }

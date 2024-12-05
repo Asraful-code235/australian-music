@@ -85,3 +85,25 @@ export interface CreateMixTrackInput {
   mixId: string;
   trackId: string;
 }
+
+export type GigsData = {
+  clubName: string;
+  dayOfGig: Date;
+  startDate: string;
+  endDate: string;
+  user: User;
+  createdAt: Date;
+  updatedAt: Date;
+  id: string;
+  isExport: boolean;
+  hasPlayed: 'yes' | 'no';
+  userId: string;
+};
+
+export type GigsDataResponse = {
+  count: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  data: GigsData[];
+};

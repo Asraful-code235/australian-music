@@ -15,16 +15,18 @@ type Period = 'all' | 'one_week' | 'one_month' | 'six_month';
 
 type DeleteTrackSelectProps = {
   onDelete: (value: Period) => void;
+  disabled?: boolean;
 };
 
 export default function DeleteTrackSelect({
   onDelete,
+  disabled,
 }: DeleteTrackSelectProps) {
   const [selectedValue, setSelectedValue] = useState<Period>('all');
 
   return (
     <div className='flex gap-2 w-full'>
-      <Button onClick={() => onDelete(selectedValue)}>
+      <Button onClick={() => onDelete(selectedValue)} disabled={disabled}>
         <TfiTrash />
         Delete
       </Button>

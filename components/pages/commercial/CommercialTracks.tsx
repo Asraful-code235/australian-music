@@ -115,10 +115,8 @@ export default function CommercialPage() {
   }, [commercialTracksData, refetch]);
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
-    console.log('Search term:', value);
     const result = await SearchTrack(value);
     setSearchResult(result);
-    console.log({ result });
   }, 500);
 
   const handleInputChange = (value: string) => {
@@ -127,7 +125,6 @@ export default function CommercialPage() {
   };
 
   const handleSearchAndAdd = async (value: Tracks) => {
-    console.log({ value });
     setSearch(value.title);
 
     if (!search.trim()) return;
@@ -165,8 +162,6 @@ export default function CommercialPage() {
 
     setIsSaving(true);
     try {
-      console.log({ tracks: tracks.slice(0, TracksLimit) });
-
       await updateTrackStatus(tracks.slice(0, TracksLimit));
       refetch();
       toast.success('Playlist saved successfully');
