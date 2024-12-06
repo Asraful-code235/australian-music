@@ -1,17 +1,19 @@
 export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+  ADMIN,
+  USER,
 }
 
 export interface User {
   id: string; // MongoDB ObjectId
   name?: string | null;
   email?: string | null;
-  hashedPassword?: string | null;
+  hashedPassword?: string;
+  plainPassword?: string;
   emailVerified?: Date | null;
   image?: string | null;
-  role?: UserRole | null | undefined;
+  role?: 'ADMIN' | 'USER';
   users?: UserTrack[];
+  active?: boolean | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -106,4 +108,12 @@ export type GigsDataResponse = {
   limit: number;
   totalPages: number;
   data: GigsData[];
+};
+
+export type UserResponse = {
+  count: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  data: User[];
 };

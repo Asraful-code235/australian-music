@@ -28,9 +28,11 @@ model User {
   name           String?
   email          String?         @unique
   hashedPassword String?
+  plainPassword String?
   emailVerified  DateTime?
   image          String?
-  role           UserRole?
+  role           UserRole @default(USER)
+  active         Boolean?        @default(true)
   // Optional for WebAuthn support
   upfrontTrack       UpfrontTrack[]  @relation("upfrontTrack")
   commercialTrack       CommercialTrack[]  @relation("commercialTrack")

@@ -43,7 +43,7 @@ const authOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email, active: true },
         });
 
         if (

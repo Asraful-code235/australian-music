@@ -1,19 +1,19 @@
 'use client';
 
-import { FetchCommercialGigs } from '@/actions/gigs/commercial/FetchCommercialGig';
-import { updateCommercialGigExportStatus } from '@/actions/gigs/commercial/UpdateCommercialGigExpStatus';
-import GigsTable from '@/components/shared/gigs-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { generateQueryString, gigsCsv } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
+import { AddUserDialog } from './add-user-dialog';
+import { columns } from './columns';
+import { DataTable } from './data-table';
 import { useRouter, useSearchParams } from 'next/navigation';
-
 import { useEffect, useState } from 'react';
-import { GoDownload } from 'react-icons/go';
+import { generateQueryString } from '@/lib/utils';
+import { fetchAllUser } from '@/actions/user/fetchAllUser';
+import { UserResponse } from '@/types/track';
 import { useDebouncedCallback } from 'use-debounce';
+import UsersTable from '../../shared/users-table';
+import { Input } from '../../ui/input';
 
-export default function CommercialGigPage() {
+export default function UserPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -25,15 +25,15 @@ export default function CommercialGigPage() {
   const queryString = generateQueryString(params);
 
   const {
-    data: commercialGigsData,
+    data: usersData,
     isLoading,
     refetch,
   } = useQuery({
     queryKey: [
-      `track/commercial-gig${queryString}`,
+      `user${queryString}`,
       { page: params.page, search: params.search },
     ],
-    queryFn: () => FetchCommercialGigs(queryString as string),
+    queryFn: () => fetchAllUser(queryString as string),
     //@ts-ignore
     keepPreviousData: true,
   });
@@ -50,48 +50,34 @@ export default function CommercialGigPage() {
     router.push(queryString);
   }, [queryString, router]);
 
-  const handleExport = async () => {
-    if (!commercialGigsData?.data || commercialGigsData?.data.length === 0)
-      return;
-
-    gigsCsv(commercialGigsData, 'commercial-gig.csv');
-
-    const ids = commercialGigsData.data.map((gig: { id: string }) => gig.id);
-    await updateCommercialGigExportStatus(ids);
-    refetch();
-  };
-
+  console.log({ usersData });
   return (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>
-          <h1 className='text-3xl font-bold tracking-tight'>Commercial Gigs</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>
+            Users Management
+          </h1>
         </div>
         <div className='flex lg:flex-row flex-col justify-between gap-3'>
           <Input
-            placeholder='Search by DJ name or Club name'
+            placeholder='Search by DJ name or Email'
             defaultValue={params.search}
             onChange={(e) => debounced(e.target.value)}
             className='w-full lg:w-2/6'
           />
           <div className='flex gap-2'>
-            <Button
-              variant='outline'
-              disabled={commercialGigsData?.data.length === 0}
-              onClick={handleExport}
-            >
-              <GoDownload />
-              <span className='hidden lg:block'>Export to CSV</span>
-            </Button>
+            <AddUserDialog />
           </div>
         </div>
       </div>
 
-      <GigsTable
-        data={commercialGigsData}
+      <UsersTable
+        data={usersData}
         isLoading={isLoading}
         params={params}
         setParams={setParams}
+        refetch={refetch}
       />
     </div>
   );
