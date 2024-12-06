@@ -66,6 +66,7 @@ export async function registerUser(data: RegisterFormInput) {
         email: data.email,
         hashedPassword,
         role: data.role,
+        plainPassword: data.password,
       },
     });
     return {

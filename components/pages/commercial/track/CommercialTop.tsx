@@ -31,7 +31,7 @@ export default function CommercialTop() {
     refetch,
   } = useQuery({
     queryKey: [
-      `track/commercial${queryString}`,
+      `track/commercial-top${queryString}`,
       { page: params.page, search: params.search },
     ],
     queryFn: () => fetchCommercialTracks(queryString as string),

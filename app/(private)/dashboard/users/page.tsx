@@ -1,4 +1,4 @@
-import UserPage from "@/components/users/UserPage";
+import UserPage from '@/components/pages/users/UserPage';
 
 export default function UsersPage() {
   return <UserPage />;

@@ -33,7 +33,7 @@ export default function UpfrontGigPage() {
     refetch,
   } = useQuery({
     queryKey: [
-      `track/commercial${queryString}`,
+      `track/upfront-gig${queryString}`,
       { page: params.page, search: params.search },
     ],
     queryFn: () => FetchUpfrontGigs(queryString as string),

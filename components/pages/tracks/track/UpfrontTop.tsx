@@ -32,7 +32,7 @@ export default function UpfrontTop() {
     refetch,
   } = useQuery({
     queryKey: [
-      `track/commercial${queryString}`,
+      `track/upfront-top${queryString}`,
       { page: params.page, search: params.search },
     ],
     queryFn: () => fetchUpfrontTracks(queryString as string),
