@@ -1,5 +1,5 @@
-import LoginForm from '@/components/auth/login-form';
+import { redirect } from 'next/navigation';
 
 export default async function Home() {
-  return <div>This is home page</div>;
+  redirect('/dashboard/commercial/top');
 }
