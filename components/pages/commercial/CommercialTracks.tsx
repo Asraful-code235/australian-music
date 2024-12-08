@@ -201,7 +201,9 @@ export default function CommercialPage() {
   return (
     <div className='max-w-3xl mx-auto p-1 lg:p-6 space-y-6'>
       <div className='flex flex-col space-y-4'>
-        <h1 className='text-3xl font-bold'>Create Your Top 20 Tracks</h1>
+        <h1 className='text-xl lg:text-3xl font-bold'>
+          Create Your Top 20 Tracks
+        </h1>
 
         <div className='relative'>
           <Command className='rounded-lg border shadow-md'>

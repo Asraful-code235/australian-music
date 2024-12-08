@@ -20,6 +20,9 @@ import { MultiValue, ActionMeta } from 'react-select';
 import { addMix } from '@/actions/shared/AddMix';
 import Select from 'react-select/async-creatable';
 import { updateUpfrontTrackWithMixes } from '@/actions/upfront-tracks/UpdateTrack';
+import { Label } from '@/components/ui/label';
+import { TfiTrash } from 'react-icons/tfi';
+import { deleteUpfrontTrack } from '@/actions/upfront-tracks/DeleteUpfrontTrack';
 
 interface TrackItemProps {
   track: UserTrack;
@@ -87,6 +90,20 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
         refetch();
       }
       toast.success('Track updated');
+    } catch (e) {
+      const errorMessage =
+        e instanceof Error ? e.message : 'Something went wrong';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteUpfrontTrack(track.id);
+      if (refetch) {
+        refetch();
+      }
+      toast.success('Track deleted');
     } catch (e) {
       const errorMessage =
         e instanceof Error ? e.message : 'Something went wrong';
@@ -173,7 +190,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   return (
     <div
       style={style}
-      className='relative p-4 flex items-center gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
+      className='relative p-3 lg:p-4 flex items-center gap-2 lg:gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
     >
       {fieldError() && (
         <div className='absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full'></div>
@@ -184,28 +201,52 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
         {...listeners}
         onFocus={handleDragStart}
         onBlur={handleDragEnd}
-        className='bg-white p-3 rounded cursor-pointer'
+        className='bg-white p-1 lg:p-3 rounded cursor-pointer'
       >
         <GripVertical className='h-5 w-5 text-gray-400' />
       </div>
       <div className='text-xs text-gray-600'>{index + 1}.</div>
       {isEditing ? (
         <div className='flex-1 space-y-2'>
-          <div className='w-full flex gap-4'>
+          <div className='w-full flex flex-col lg:flex-row gap-2 lg:gap-4'>
+            <div>
+              <Label>Title</Label>
+              <Input
+                placeholder='Title'
+                value={trackTitle}
+                onChange={(e) => setTrackTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Artist</Label>
+              <Input
+                placeholder='Artist'
+                value={editedTrack?.artist || ''}
+                onChange={(e) =>
+                  setEditedTrack((prev) => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      artist: e.target.value,
+                      createdAt: prev.createdAt ?? new Date(),
+                      updatedAt: new Date(),
+                    };
+                  })
+                }
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Label</Label>
             <Input
-              placeholder='Title'
-              value={trackTitle}
-              onChange={(e) => setTrackTitle(e.target.value)}
-            />
-            <Input
-              placeholder='Artist'
-              value={editedTrack?.artist || ''}
+              placeholder='Label'
+              value={editedTrack?.label || ''}
               onChange={(e) =>
                 setEditedTrack((prev) => {
                   if (!prev) return prev;
                   return {
                     ...prev,
-                    artist: e.target.value,
+                    label: e.target.value,
                     createdAt: prev.createdAt ?? new Date(),
                     updatedAt: new Date(),
                   };
@@ -214,6 +255,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
             />
           </div>
           <div>
+            <Label>Mixes</Label>
             <Select
               isMulti
               cacheOptions
@@ -237,14 +279,15 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
               styles={{
                 control: (provided, state) => ({
                   ...provided,
-                  height: '2.25rem',
+
+                  minHeight: '3rem',
                   borderRadius: '0.375rem',
                   border: state.isFocused
                     ? '1px solid #5b6371'
                     : '1px solid #D1D5DB',
                   backgroundColor: 'transparent',
                   fontSize: '0.875rem',
-                  boxShadow: ' 0 1px 2px 0 rgb(0 0 0 / 0.05);',
+                  boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
                   '&:hover': {
                     borderColor: state.isFocused ? '#9CA3AF' : '#D1D5DB',
                   },
@@ -252,7 +295,6 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
                 input: (provided) => ({
                   ...provided,
                   padding: '',
-
                   fontSize: '16px',
                 }),
                 placeholder: (provided) => ({
@@ -279,19 +321,25 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       ) : (
         <div className='flex-1 grid grid-cols-3 gap-4'>
           <span className='truncate'>{track?.track?.title}</span>
+          <span className='truncate'>
+            {track?.mixes
+              ?.map((item) => item?.mix?.title)
+              .filter(Boolean)
+              .join(', ')}
+          </span>
           <span className='truncate'>{track?.artist}</span>
           {/* <span>{track.releaseDate}</span> */}
         </div>
       )}
 
-      <div className='flex gap-2'>
+      <div className='flex gap-1'>
         {isEditing ? (
           <>
             <Button size='icon' variant='ghost' onClick={handleSave}>
               <Save className='h-4 w-4' />
             </Button>
             <Button
-              className='z-[9999]'
+              className='z-10'
               size='icon'
               variant='ghost'
               onClick={() => setIsEditing(false)}
@@ -300,14 +348,24 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
             </Button>
           </>
         ) : (
-          <Button
-            className='z-[9999]'
-            size='icon'
-            variant='ghost'
-            onClick={() => setIsEditing(true)}
-          >
-            <Edit className='h-4 w-4' />
-          </Button>
+          <>
+            <Button
+              className='z-10'
+              size='icon'
+              variant='ghost'
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className='h-4 w-4' />
+            </Button>
+            <Button
+              className='z-10'
+              size='icon'
+              variant='ghost'
+              onClick={handleDelete}
+            >
+              <TfiTrash />
+            </Button>
+          </>
         )}
       </div>
     </div>

@@ -100,6 +100,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
         ],
       },
+      {
+        title: 'Profile',
+        url: '#',
+        items: [
+          {
+            title: 'Settings',
+            url: '/dashboard/settings',
+          },
+        ],
+      },
     ].filter((item) => {
       if (
         !isAdmin &&
@@ -176,7 +186,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <div className='flex flex-col gap-0'>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className='w-[150px] text-sm truncate'>
+                  <div className='w-[150px] text-sm truncate text-left'>
                     {session?.user.name || 'User name'}
                   </div>
                 </TooltipTrigger>

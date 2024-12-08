@@ -6,6 +6,7 @@ const USER_ALLOWED_PATHS = [
   '/dashboard/upfront/top',
   '/dashboard/commercial/gigs',
   '/dashboard/upfront/gigs',
+  '/dashboard/settings',
 ];
 
 export default withAuth(
