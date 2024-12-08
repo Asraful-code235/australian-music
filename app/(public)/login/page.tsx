@@ -12,7 +12,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+      const callbackUrl =
+        searchParams.get('callbackUrl') || '/dashboard/commercial/top';
       router.replace(callbackUrl);
     }
   }, [status, router, searchParams]);
