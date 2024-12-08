@@ -25,6 +25,7 @@ import { addMix } from '@/actions/shared/AddMix';
 import { updateUpfrontTrackWithMixes } from '@/actions/commercial-tracks/UpdateTracks';
 import { TfiTrash } from 'react-icons/tfi';
 import { deleteCommercialTrack } from '@/actions/commercial-tracks/DeleteCommercialTrack';
+import { Label } from '@/components/ui/label';
 
 interface CommercialTrackItemProps {
   track: UserTrack;
@@ -198,7 +199,7 @@ export function CommercialTrackItem({
   return (
     <div
       style={style}
-      className='relative p-4 flex items-center gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
+      className='relative p-3 lg:p-4 flex items-center gap-2 lg:gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
     >
       {fieldError() && (
         <div className='absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full'></div>
@@ -209,36 +210,43 @@ export function CommercialTrackItem({
         {...listeners}
         onFocus={handleDragStart}
         onBlur={handleDragEnd}
-        className='bg-white p-3 rounded cursor-pointer'
+        className='bg-white p-1 lg:p-3 rounded cursor-pointer'
       >
         <GripVertical className='h-5 w-5 text-gray-400' />
       </div>
       <div className='text-xs text-gray-600'>{index + 1}.</div>
       {isEditing ? (
         <div className='flex-1 space-y-2'>
-          <div className='w-full flex gap-4'>
-            <Input
-              placeholder='Title'
-              value={trackTitle}
-              onChange={(e) => setTrackTitle(e.target.value)}
-            />
-            <Input
-              placeholder='Artist'
-              value={editedTrack?.artist || ''}
-              onChange={(e) =>
-                setEditedTrack((prev) => {
-                  if (!prev) return prev;
-                  return {
-                    ...prev,
-                    artist: e.target.value,
-                    createdAt: prev.createdAt ?? new Date(),
-                    updatedAt: new Date(),
-                  };
-                })
-              }
-            />
+          <div className='w-full flex flex-col lg:flex-row gap-2 lg:gap-4'>
+            <div>
+              <Label>Title</Label>
+              <Input
+                placeholder='Title'
+                value={trackTitle}
+                onChange={(e) => setTrackTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Artist</Label>
+              <Input
+                placeholder='Artist'
+                value={editedTrack?.artist || ''}
+                onChange={(e) =>
+                  setEditedTrack((prev) => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      artist: e.target.value,
+                      createdAt: prev.createdAt ?? new Date(),
+                      updatedAt: new Date(),
+                    };
+                  })
+                }
+              />
+            </div>
           </div>
           <div>
+            <Label>Label</Label>
             <Input
               placeholder='Label'
               value={editedTrack?.label || ''}
@@ -256,6 +264,7 @@ export function CommercialTrackItem({
             />
           </div>
           <div>
+            <Label>Mixes</Label>
             <Select
               isMulti
               cacheOptions
@@ -279,22 +288,22 @@ export function CommercialTrackItem({
               styles={{
                 control: (provided, state) => ({
                   ...provided,
-                  height: '2.25rem',
+
+                  minHeight: '3rem',
                   borderRadius: '0.375rem',
                   border: state.isFocused
                     ? '1px solid #5b6371'
                     : '1px solid #D1D5DB',
                   backgroundColor: 'transparent',
                   fontSize: '0.875rem',
-                  boxShadow: ' 0 1px 2px 0 rgb(0 0 0 / 0.05);',
+                  boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
                   '&:hover': {
-                    borderColor: state.isFocused ? '#9CA3AF' : '#D1D5DB', // Prevent hover effect when focused
+                    borderColor: state.isFocused ? '#9CA3AF' : '#D1D5DB',
                   },
                 }),
                 input: (provided) => ({
                   ...provided,
                   padding: '',
-
                   fontSize: '16px',
                 }),
                 placeholder: (provided) => ({
@@ -321,6 +330,12 @@ export function CommercialTrackItem({
       ) : (
         <div className='flex-1 grid grid-cols-3 gap-4'>
           <span className='truncate'>{track?.track?.title}</span>
+          <span className='truncate'>
+            {track?.mixes
+              ?.map((item) => item?.mix?.title)
+              .filter(Boolean)
+              .join(', ')}
+          </span>
           <span className='truncate'>{track?.artist}</span>
           {/* <span>{track.releaseDate}</span> */}
         </div>

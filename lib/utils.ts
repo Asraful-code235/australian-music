@@ -55,8 +55,8 @@ export const exportToCSV = (data: PaginatedTracks, filename: string) => {
   if (!data || !data.data) return;
 
   const headers = [
-    'Artist',
     'Position',
+    'Artist',
     'Created At',
     'Updated At',
     'User Name',
