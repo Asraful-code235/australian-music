@@ -32,6 +32,7 @@ import { TracksLimit } from '@/lib/utils';
 import { addSearchedTrack } from '@/actions/upfront-tracks/AddSearchTrack';
 import { useDebouncedCallback } from 'use-debounce';
 import { SearchTrack } from '@/actions/shared/SearchTrack';
+import { ImportUpfrontTracks } from '@/actions/upfront-tracks/ImportUpfrontTracks';
 
 export default function TracksPage() {
   const { data: session, status } = useSession();
@@ -145,6 +146,20 @@ export default function TracksPage() {
     }
   };
 
+  const handleImport = async () => {
+    if (!session) {
+      toast.error('Please sign in to save your playlist');
+      return;
+    }
+    try {
+      await ImportUpfrontTracks(session?.user?.id);
+      refetch();
+      toast.success('Playlist saved successfully');
+    } catch (error) {
+      toast.error('Failed to save playlist');
+    }
+  };
+
   useEffect(() => {
     if (tracksData) {
       const typedTracksData = tracksData.map((item: any) => ({
@@ -210,48 +225,55 @@ export default function TracksPage() {
           Create Your Top 20 Tracks
         </h1>
 
-        <div className='relative'>
-          <Command className='rounded-lg border shadow-md'>
-            <div className='flex items-center border-b px-3'>
-              <Music className='mr-2 h-4 w-4 shrink-0 opacity-50' />
-              <Input
-                placeholder='Search or create a track...'
-                value={search}
-                onChange={(e) => handleInputChange(e.target.value)}
-                className='flex h-11 w-full border-none shadow-none focus-none  focus-visible:ring-0'
-              />
-            </div>
-          </Command>
-
-          {search && (
-            <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-[9999] max-h-[250px] overflow-y-auto'>
-              <div>
-                {searchResult.map((track) => {
-                  return (
-                    <div
-                      key={track.id}
-                      className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
-                      onClick={() => handleSearchAndAdd(track)}
-                    >
-                      {track.title}
-                    </div>
-                  );
-                })}
+        <div className='flex gap-3'>
+          <div className='relative flex-1'>
+            <Command className='rounded-lg border shadow-md'>
+              <div className='flex items-center border-b px-3'>
+                <Music className='mr-2 h-4 w-4 shrink-0 opacity-50' />
+                <Input
+                  placeholder='Search or create a track...'
+                  value={search}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  className='flex h-10 w-full border-none shadow-none focus-none  focus-visible:ring-0'
+                />
               </div>
-              {searchResult.length < 1 && (
-                <div className='p-2'>
-                  <Button
-                    variant='ghost'
-                    className='w-full justify-start'
-                    onClick={handleAddTrack}
-                  >
-                    <Plus className='mr-2 h-4 w-4' />
-                    Create &quot;{search}&quot;
-                  </Button>
+            </Command>
+
+            {search && (
+              <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-[9999] max-h-[250px] overflow-y-auto'>
+                <div>
+                  {searchResult.map((track) => {
+                    return (
+                      <div
+                        key={track.id}
+                        className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
+                        onClick={() => handleSearchAndAdd(track)}
+                      >
+                        {track.title}
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-          )}
+                {searchResult.length < 1 && (
+                  <div className='p-2'>
+                    <Button
+                      variant='ghost'
+                      className='w-full justify-start'
+                      onClick={handleAddTrack}
+                    >
+                      <Plus className='mr-2 h-4 w-4' />
+                      Create &quot;{search}&quot;
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div>
+            <Button size='lg' onClick={handleImport}>
+              Import
+            </Button>
+          </div>
         </div>
 
         <DndContext

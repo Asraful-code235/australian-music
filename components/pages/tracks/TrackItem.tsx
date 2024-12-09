@@ -280,7 +280,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
                 control: (provided, state) => ({
                   ...provided,
 
-                  minHeight: '3rem',
+                  minHeight: '2rem',
                   borderRadius: '0.375rem',
                   border: state.isFocused
                     ? '1px solid #5b6371'

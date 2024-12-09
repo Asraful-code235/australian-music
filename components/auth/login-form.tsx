@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { LoginFormInput } from '@/actions/auth';
 import { signIn, SignInResponse } from 'next-auth/react';
+import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 
 const LoginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -28,7 +29,7 @@ const LoginSchema = z.object({
 
 export default function LoginForm() {
   const router = useRouter();
-
+  const [togglePassword, setTogglePassword] = useState(false);
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const previousURL = searchParams.get('callbackUrl');
@@ -80,15 +81,31 @@ export default function LoginForm() {
               <Input
                 id='email'
                 type='email'
-                placeholder='m@example.com'
+                placeholder='example@domain.com'
                 {...register('email')}
               />
               {errors.email && (
                 <p className='text-sm text-red-500'>{errors.email.message}</p>
               )}
             </div>
-            <div className='grid gap-2'>
-              <Input id='password' type='password' {...register('password')} />
+            <div className='grid gap-2 relative'>
+              <Input
+                id='password'
+                type={togglePassword ? 'text' : 'password'}
+                placeholder='*******'
+                {...register('password')}
+              />
+              {!togglePassword ? (
+                <FaRegEye
+                  className='absolute top-[6px] right-2 w-6 h-6 p-1 cursor-pointer'
+                  onClick={() => setTogglePassword(true)}
+                />
+              ) : (
+                <FaRegEyeSlash
+                  className='absolute top-[6px] right-2 w-6 h-6 p-1 cursor-pointer'
+                  onClick={() => setTogglePassword(false)}
+                />
+              )}
               {errors.password && (
                 <p className='text-sm text-red-500'>
                   {errors.password.message}
