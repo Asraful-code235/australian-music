@@ -11,7 +11,6 @@ export const fetchSingleUser = async (email: string) => {
     });
     return { user };
   } catch (e) {
-    console.log(e);
     throw new Error('Failed to load user');
   }
 };

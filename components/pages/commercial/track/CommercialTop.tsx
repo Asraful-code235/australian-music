@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { GoDownload } from 'react-icons/go';
+import { updateCommercialExportStatus } from '@/actions/commercial-tracks/CommercialTrackExport';
 
 export default function CommercialTop() {
   const router = useRouter();
@@ -58,6 +59,15 @@ export default function CommercialTop() {
     refetch();
   };
 
+  const handleExport = async () => {
+    if (!commercialData?.data || commercialData?.data.length === 0) return;
+
+    exportToCSV(commercialData, 'commercial-track.csv');
+    const ids = commercialData.data.map((gig: { id: string }) => gig.id);
+    await updateCommercialExportStatus(ids);
+    refetch();
+  };
+
   return (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
@@ -77,9 +87,7 @@ export default function CommercialTop() {
             <Button
               variant='outline'
               disabled={commercialData?.data.length === 0}
-              onClick={() =>
-                exportToCSV(commercialData, 'commercial-track.csv')
-              }
+              onClick={handleExport}
             >
               <GoDownload />
               <span className='hidden lg:block'>Export to CSV</span>

@@ -11,6 +11,7 @@ export const FetchUpfrontGigs = async (data: string) => {
   try {
     const count = await db.upfrontGigs.count({
       where: {
+        isExport: false,
         clubName: {
           contains: search,
           mode: 'insensitive',
@@ -70,7 +71,6 @@ export const FetchUpfrontGigs = async (data: string) => {
 
     return { count, page, limit, totalPages, data: upfrontGigs };
   } catch (e) {
-    console.log(e);
     throw new Error('Failed to fetch commercial gigs');
   }
 };

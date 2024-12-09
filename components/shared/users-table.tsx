@@ -23,6 +23,10 @@ import { EditUserDialog } from '../pages/users/edit-user-form';
 import ModalForm from './shared-modal';
 import UserTableRow from './user-table-row';
 import { QueryObserverResult } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Copy, Edit, Trash2 } from 'lucide-react';
+import UsersCard from './users-card';
 
 type UserTableProps = {
   data: {
@@ -74,30 +78,45 @@ export default function UsersTable({
     'Loading...'
   ) : (
     <div className='mt-8'>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className='w-[100px]'>Serial No.</TableHead>
-            <TableHead>DJ Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Password</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead className='text-center'>Options</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+      <div className='lg:block hidden'>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className='w-[100px]'>Serial No.</TableHead>
+              <TableHead>DJ Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Password</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className='text-center'>Options</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.data.map((items, index) => (
+              <UserTableRow
+                key={items.id}
+                items={items}
+                index={index}
+                handleCopy={handleCopy}
+                refetch={refetch}
+                //   handleDeleteClick={handleDeleteClick}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className='lg:hidden block'>
+        <div className='grid md:grid-cols-2 grid-cols-1 gap-3'>
           {data.data.map((items, index) => (
-            <UserTableRow
+            <UsersCard
               key={items.id}
               items={items}
               index={index}
               handleCopy={handleCopy}
               refetch={refetch}
-              //   handleDeleteClick={handleDeleteClick}
             />
           ))}
-        </TableBody>
-      </Table>
+        </div>
+      </div>
       {data.totalPages > 1 && (
         <div className='flex items-center justify-end space-x-2 py-4'>
           <Button

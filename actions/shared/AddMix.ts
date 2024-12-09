@@ -9,7 +9,6 @@ export async function addMix({ title }: { title: string }) {
     });
     return newMix;
   } catch (error) {
-    console.log(error);
     throw new Error('Failed to create mix');
   }
 }

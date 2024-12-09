@@ -15,7 +15,6 @@ const getUserByEmail = async (email: string) => {
     });
     return user;
   } catch (error) {
-    console.log(error);
     return null;
   }
 };
@@ -40,10 +39,7 @@ export async function registerUser(data: RegisterFormInput) {
   const validatedFields = RegisterSchema.safeParse(data);
 
   if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Invalid input',
-    };
+    throw new Error(validatedFields.error.errors[0].message);
   }
 
   try {
@@ -52,10 +48,7 @@ export async function registerUser(data: RegisterFormInput) {
     });
 
     if (existingUser) {
-      return {
-        errors: null,
-        message: 'User with this email already exists',
-      };
+      throw new Error('User with this email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -73,10 +66,6 @@ export async function registerUser(data: RegisterFormInput) {
       message: 'User registered successfully',
     };
   } catch (error) {
-    console.log(error);
-    return {
-      errors: null,
-      message: 'An error occurred during registration',
-    };
+    throw error;
   }
 }

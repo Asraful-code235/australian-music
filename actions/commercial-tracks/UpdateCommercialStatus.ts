@@ -19,13 +19,13 @@ export async function updateTrackStatus(items: UserTrack[]) {
           where: { id: item.id },
           data: {
             status: true,
+            isExport: false,
             orderIndex: currentOrderIndex,
           },
         });
       })
     );
   } catch (e) {
-    console.log(e);
     throw new Error('Failed to update commercial track status');
   }
 }

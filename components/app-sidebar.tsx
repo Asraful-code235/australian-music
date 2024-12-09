@@ -29,8 +29,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isAdmin = session?.user.role === 'ADMIN';
   const pathname = usePathname();
 
-  console.log({ pathname: pathname === '/dashboard/upfront/top' });
-
   const data = {
     navMain: [
       {
@@ -184,16 +182,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
             )}
             <div className='flex flex-col gap-0'>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className='w-[150px] text-sm truncate text-left'>
-                    {session?.user.name || 'User name'}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {session?.user.name || 'User name'}
-                </TooltipContent>
-              </Tooltip>
+              <div className='w-[150px] text-sm truncate text-left'>
+                {session?.user.name || 'User name'}
+              </div>
+
               <div className='inline-flex items-center'>
                 <div className='text-[10px] border rounded-lg p-1 whitespace-nowrap'>
                   {session?.user.role}

@@ -16,7 +16,6 @@ export async function SearchTrack(search: string) {
     });
     return searchTracks;
   } catch (e) {
-    console.error(e);
     throw new Error('Failed to fetch tracks');
   }
 }

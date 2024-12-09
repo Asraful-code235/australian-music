@@ -25,6 +25,7 @@ export const fetchCommercialTracks = async (data: string) => {
 
     const commercialTracks = await db.commercialTrack.findMany({
       where: {
+        isExport: false,
         status: true,
         user: {
           name: {
@@ -72,7 +73,6 @@ export const fetchCommercialTracks = async (data: string) => {
       data: commercialTracks,
     };
   } catch (error) {
-    console.error('Error loading CommercialTracks:', error);
     throw new Error('Failed to load CommercialTracks');
   }
 };

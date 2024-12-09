@@ -50,7 +50,6 @@ export default function UserPage() {
     router.push(queryString);
   }, [queryString, router]);
 
-  console.log({ usersData });
   return (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
@@ -67,7 +66,7 @@ export default function UserPage() {
             className='w-full lg:w-2/6'
           />
           <div className='flex gap-2'>
-            <AddUserDialog />
+            <AddUserDialog refetch={refetch} />
           </div>
         </div>
       </div>
