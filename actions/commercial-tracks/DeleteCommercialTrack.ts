@@ -9,7 +9,6 @@ export const deleteCommercialTrack = async (id: string) => {
     });
     return res;
   } catch (e) {
-    console.error(e);
     throw new Error('Failed to delete track');
   }
 };

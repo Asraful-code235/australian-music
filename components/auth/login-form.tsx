@@ -59,7 +59,6 @@ export default function LoginForm() {
           toast.error('Wrong username or password');
         }
       } else {
-        console.error('Login failed: signIn returned undefined');
         toast.error('An error occurred during login');
       }
     });

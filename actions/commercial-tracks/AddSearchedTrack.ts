@@ -23,7 +23,6 @@ export async function addSearchedTrack({ trackId, userId, position }: Tracks) {
       newTrackUser,
     };
   } catch (error: unknown) {
-    console.error('Error creating track:', error);
     throw new Error('Failed to create track');
   }
 }

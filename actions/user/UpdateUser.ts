@@ -25,7 +25,6 @@ export const UpdateUser = async ({ data, id }: UpdateUserInput) => {
     });
     return updateUser;
   } catch (e) {
-    console.log(e);
     throw new Error('Failed to User');
   }
 };

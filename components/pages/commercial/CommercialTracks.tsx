@@ -83,7 +83,6 @@ export default function CommercialPage() {
 
     const userId = session?.user.id;
     if (!userId) {
-      console.error('User ID is not available in the session.');
       return;
     }
     const position = tracks.length ? tracks.length + 1 : 1;
@@ -113,9 +112,9 @@ export default function CommercialPage() {
     try {
       await ImportCommercialTracks(session?.user?.id);
       refetch();
-      toast.success('Playlist saved successfully');
+      toast.success('Tracks imported successfully');
     } catch (error) {
-      toast.error('Failed to save playlist');
+      toast.error('Failed to import tracks');
     }
   };
 
@@ -146,7 +145,6 @@ export default function CommercialPage() {
 
     const userId = session?.user.id;
     if (!userId) {
-      console.error('User ID is not available in the session.');
       return;
     }
     const position = tracks.length ? tracks.length + 1 : 1;

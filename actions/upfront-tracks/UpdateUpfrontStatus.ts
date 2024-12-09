@@ -19,6 +19,7 @@ export async function updateTrackStatus(items: UserTrack[]) {
           where: { id: item.id },
           data: {
             status: true,
+            isExport: false,
             orderIndex: currentOrderIndex,
           },
         });

@@ -2,6 +2,7 @@
 
 import { deleteUpfrontTracks } from '@/actions/admin/upfront/DeleteUpfrontTracks';
 import { fetchUpfrontTracks } from '@/actions/admin/upfront/FetchUpfrontTrack';
+import { updateUpfrontExportStatus } from '@/actions/upfront-tracks/UpfrontTracksExport';
 import DeleteTrackSelect from '@/components/shared/delete-track-select';
 import NoDataFound from '@/components/shared/no-data-found';
 import TracksTable from '@/components/shared/tracks-table';
@@ -59,6 +60,15 @@ export default function UpfrontTop() {
     refetch();
   };
 
+  const handleExport = async () => {
+    if (!upfrontData?.data || upfrontData?.data.length === 0) return;
+
+    exportToCSV(upfrontData, 'upfront-track.csv');
+    const ids = upfrontData.data.map((gig: { id: string }) => gig.id);
+    await updateUpfrontExportStatus(ids);
+    refetch();
+  };
+
   return (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
@@ -77,7 +87,7 @@ export default function UpfrontTop() {
           <div className='flex gap-2'>
             <Button
               variant='outline'
-              onClick={() => exportToCSV(upfrontData, 'upfront-track.csv')}
+              onClick={handleExport}
               disabled={upfrontData?.data.length === 0}
             >
               <GoDownload />

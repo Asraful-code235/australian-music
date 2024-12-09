@@ -18,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { QueryObserverResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -31,10 +33,13 @@ const RegisterSchema = z.object({
   role: z.enum(['USER', 'ADMIN']),
 });
 
-export function AddUserDialog() {
+export function AddUserDialog({
+  refetch,
+}: {
+  refetch?: () => Promise<QueryObserverResult>;
+}) {
   const [open, setOpen] = useState(false);
 
-  const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -49,19 +54,19 @@ export function AddUserDialog() {
 
   const onSubmit = async (data: RegisterFormInput) => {
     setIsLoading(true);
-    setServerError(null);
     try {
       const result = await registerUser(data);
-      if (result.errors) {
-        setServerError(result.message || 'An error occurred');
-        toast.error(result.message);
-      } else {
-        toast.success('Registration Successful');
-        reset();
+
+      toast.success('Registration Successful');
+      if (refetch) {
+        refetch();
       }
+      reset();
     } catch (error) {
-      console.error('Registration error:', error);
-      setServerError('An unexpected error occurred');
+      const message =
+        error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(message);
+      reset();
     } finally {
       setIsLoading(false);
       setOpen(false);
@@ -138,7 +143,6 @@ export function AddUserDialog() {
           <Button type='submit' className='w-full' disabled={isLoading}>
             {isLoading ? 'Registering...' : 'Register'}
           </Button>
-          {serverError && <p className='text-sm text-red-500'>{serverError}</p>}
         </form>
       </DialogContent>
     </Dialog>

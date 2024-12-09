@@ -11,6 +11,7 @@ export const FetchCommercialGigs = async (data: string) => {
   try {
     const count = await db.commercialGigs.count({
       where: {
+        isExport: false,
         clubName: {
           contains: search,
           mode: 'insensitive',
@@ -70,7 +71,6 @@ export const FetchCommercialGigs = async (data: string) => {
 
     return { count, page, limit, totalPages, data: commercialGigs };
   } catch (e) {
-    console.log(e);
     throw new Error('Failed to fetch commercial gigs');
   }
 };

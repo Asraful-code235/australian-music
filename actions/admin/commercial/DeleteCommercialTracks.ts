@@ -42,8 +42,6 @@ export const deleteCommercialTracks = async (
           : {}),
       },
     });
-
-    console.log(`Deleted ${deleteResult.count} CommercialTrack(s)`);
   } catch (error) {
     console.error('Error deleting CommercialTracks:', error);
   }

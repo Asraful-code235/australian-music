@@ -1,30 +1,21 @@
-import { IoClipboardOutline } from 'react-icons/io5';
+import { Card, CardContent, CardHeader } from '../ui/card';
 import { Button } from '../ui/button';
-import { TableCell, TableRow } from '../ui/table';
-import { PiNotePencilLight } from 'react-icons/pi';
-import { FiTrash2 } from 'react-icons/fi';
-import { EditUserDialog } from '../pages/users/edit-user-form';
-import ModalForm from './shared-modal';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { RegisterFormInput } from '@/actions/auth';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useState, useTransition } from 'react';
-import { UserRole, UserTrack } from '@/types/track';
-import { toast } from 'sonner';
-import { UpdateUser } from '@/actions/user/UpdateUser';
+import { Badge } from '../ui/badge';
+import { Copy, Edit, Trash2 } from 'lucide-react';
 import { QueryObserverResult } from '@tanstack/react-query';
 import { updateUserStatus } from '@/actions/user/updateUserStatus';
+import { toast } from 'sonner';
+import { RegisterFormInput } from '@/actions/auth';
+import { UpdateUser } from '@/actions/user/UpdateUser';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { useState, useTransition } from 'react';
+import { z } from 'zod';
+import ModalForm from './shared-modal';
+import { EditUserDialog } from '../pages/users/edit-user-form';
 import ConfirmModal from './ConfirmModal';
 
-const RegisterSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['USER', 'ADMIN']),
-});
-
-type UserTableRowProps = {
+type UserCardProps = {
   items: {
     id: string;
     name?: string | null;
@@ -40,12 +31,19 @@ type UserTableRowProps = {
   refetch?: () => Promise<QueryObserverResult>;
 };
 
-export default function UserTableRow({
+const RegisterSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  role: z.enum(['USER', 'ADMIN']),
+});
+
+export default function UsersCard({
   items,
   index,
   handleCopy,
   refetch,
-}: UserTableRowProps) {
+}: UserCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -110,45 +108,64 @@ export default function UserTableRow({
       toast.error('Failed to delete category. Please try again.');
     }
   };
-
   return (
     <>
-      {' '}
-      <TableRow>
-        <TableCell>{index + 1}</TableCell>
-        <TableCell>{items.name}</TableCell>
-        <TableCell>{items.email}</TableCell>
-        <TableCell>*********</TableCell>
-        <TableCell>{items.role}</TableCell>
-
-        <TableCell className='text-center'>
-          <div className='space-x-1.5'>
+      <Card className='hover:shadow-lg transition-shadow'>
+        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+          <div className='flex items-center space-x-2'>
+            <span className='text-sm font-medium'>#{index + 1}</span>
+            <Badge
+              variant={items.role === 'ADMIN' ? 'destructive' : 'secondary'}
+            >
+              {items.role}
+            </Badge>
+          </div>
+          <div className='flex items-center gap-2'>
             <Button
-              className='w-8 h-8'
-              variant='outline'
+              variant='ghost'
               size='icon'
+              className='h-8 w-8'
+              onClick={() => setIsOpen(true)}
+            >
+              <Edit className='h-4 w-4' />
+            </Button>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-8 w-8 text-destructive'
+              onClick={() => handleDeleteClick(items.id)}
+            >
+              <Trash2 className='h-4 w-4' />
+            </Button>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-6 w-6'
               onClick={() =>
                 handleCopy(items.email || 'N/A', items.plainPassword || '')
               }
             >
-              <IoClipboardOutline />
-            </Button>
-
-            <Button variant='outline' size='sm' onClick={() => setIsOpen(true)}>
-              <PiNotePencilLight />
-              Edit
-            </Button>
-            <Button
-              className='w-8 h-8'
-              variant='destructive'
-              size='icon'
-              onClick={() => handleDeleteClick(items.id)}
-            >
-              <FiTrash2 />
+              <Copy className='h-3 w-3' />
             </Button>
           </div>
-        </TableCell>
-      </TableRow>
+        </CardHeader>
+        <CardContent className='grid gap-4'>
+          <div className='grid gap-2'>
+            <div className='text-sm font-medium'>DJ Name</div>
+            <div className='text-sm text-muted-foreground'>{items.name}</div>
+          </div>
+          <div className='grid gap-2'>
+            <div className='text-sm font-medium'>Email</div>
+            <div className='text-sm text-muted-foreground'>{items.email}</div>
+          </div>
+          <div className='grid gap-2'>
+            <div className='text-sm font-medium'>Password</div>
+            <div className='flex items-center gap-2'>
+              <div className='text-sm text-muted-foreground'>*********</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <ModalForm<RegisterFormInput>
         isOpen={isOpen}
         setIsOpen={setIsOpen}

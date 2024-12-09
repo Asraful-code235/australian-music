@@ -32,7 +32,6 @@ export const AddUpfrontGig = async ({
     });
     return newCommercialGig;
   } catch (error) {
-    console.log(error);
     throw new Error('Failed to create commercial gig');
   }
 };

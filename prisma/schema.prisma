@@ -71,7 +71,7 @@ model UpfrontTrack {
   trackId  String   @db.ObjectId
   artist      String?
   label String?
-  isExport   Boolean?
+  isExport   Boolean?@default(false)
   status      Boolean? @default(false)
   position    Int?
    orderIndex Int?
@@ -91,7 +91,7 @@ model CommercialTrack {
   trackId  String   @db.ObjectId
   artist      String?
   label     String?
-  isExport   Boolean?
+  isExport   Boolean?@default(false)
   status      Boolean? @default(false)
   position    Int?
   orderIndex Int?

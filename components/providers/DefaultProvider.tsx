@@ -14,7 +14,7 @@ export default function DefaultProvider({
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>{children}</TooltipProvider>
-        <Toaster position='top-center' />
+        <Toaster position='top-center' richColors />
       </QueryClientProvider>
     </SessionProvider>
   );

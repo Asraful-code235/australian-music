@@ -56,14 +56,11 @@ export default function SettingsForm() {
       return fetchSingleUser(session.user.email)
         .then((data) => data)
         .catch((error) => {
-          console.error(error);
           throw error;
         });
     },
     enabled: !!session?.user?.email,
   });
-
-  console.log({ userData });
 
   const form = useForm<FormData>({
     resolver: zodResolver(updateProfileSchema),
@@ -87,7 +84,6 @@ export default function SettingsForm() {
   }, [userData, form]);
 
   const onSubmit = async (data: FormData) => {
-    console.log({ data });
     const payload = {
       ...data,
       role: userData?.user ? userData?.user?.role : 'USER',
@@ -101,8 +97,6 @@ export default function SettingsForm() {
       toast.error(message);
     }
   };
-
-  console.log({ errors: form.formState.errors });
 
   return (
     <div className='w-full max-w-2xl shadow-none border-none'>
@@ -207,9 +201,6 @@ export default function SettingsForm() {
             )}
           />
           <div className='flex justify-end space-x-4'>
-            <Button variant='outline' type='button'>
-              Cancel
-            </Button>
             <Button type='submit'>Save</Button>
           </div>
         </form>

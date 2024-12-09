@@ -11,7 +11,6 @@ export async function updateUserStatus(id: string) {
 
     return updateUser;
   } catch (e) {
-    console.log(e);
     throw new Error('Failed to update commercial track position');
   }
 }

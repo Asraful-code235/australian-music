@@ -78,8 +78,8 @@ export interface CreateTrackInput {
 export interface CreateUserTrackInput {
   userId: string;
   trackId: string;
-  isExport?: boolean;
-  status?: string;
+  isExport: boolean;
+  status?: boolean;
   position?: number;
 }
 

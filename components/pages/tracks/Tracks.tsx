@@ -154,9 +154,9 @@ export default function TracksPage() {
     try {
       await ImportUpfrontTracks(session?.user?.id);
       refetch();
-      toast.success('Playlist saved successfully');
+      toast.success('Track imported successfully');
     } catch (error) {
-      toast.error('Failed to save playlist');
+      toast.error('Failed to import tracks');
     }
   };
 

@@ -11,7 +11,6 @@ export async function ImportCommercialTracks(userId: string) {
 
     return { success: true, track: updatedTrack };
   } catch (error) {
-    console.error('Error updating commercial track status:', error);
     return { success: false, error: 'Failed to update track status' };
   }
 }
