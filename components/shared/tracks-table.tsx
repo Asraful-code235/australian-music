@@ -17,7 +17,10 @@ import { Music2, Trophy, User } from 'lucide-react';
 export type UserTrack = {
   id?: string;
   position?: number | null | undefined;
-  artist?: string | null;
+  artists: {
+    id: string;
+    name: string;
+  } | null;
   user: {
     id: string;
     name: string | null;
@@ -90,7 +93,7 @@ export default function TracksTable({
                 <TableCell>{items.position}</TableCell>
                 <TableCell>{items.user?.name}</TableCell>
                 <TableCell>{items.track?.title}</TableCell>
-                <TableCell>{items.artist}</TableCell>
+                <TableCell>{items.artists?.name}</TableCell>
                 <TableCell>
                   {items.mixes
                     ?.map((item) => item?.mix?.title)
@@ -140,7 +143,7 @@ export default function TracksTable({
                   <div className='grid gap-0.5'>
                     <label className='text-sm font-medium'>Artist</label>
                     <span className='text-sm text-muted-foreground'>
-                      {items.artist}
+                      {items?.artists?.name}
                     </span>
                   </div>
                 </div>

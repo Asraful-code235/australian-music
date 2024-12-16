@@ -48,15 +48,24 @@ export interface UserTrack {
   createdAt: Date;
   updatedAt: Date;
   mixes?: MixTrack[];
-  artist?: string | null;
+  artists?: Artist | null;
 }
 
 export interface Mix {
   id: string;
   title: string;
+  trackId: string;
   createdAt: Date;
   updatedAt: Date;
   tracks?: MixTrack[];
+}
+
+export interface Artist {
+  id: string;
+  name: string;
+  trackId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface MixTrack {

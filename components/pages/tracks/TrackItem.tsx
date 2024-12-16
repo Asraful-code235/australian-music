@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { GripVertical, Save, Edit, X } from 'lucide-react';
-import { Tracks, UserTrack } from '@/types/track';
+import { Artist, Mix, Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
 import {
@@ -23,6 +23,9 @@ import { updateUpfrontTrackWithMixes } from '@/actions/upfront-tracks/UpdateTrac
 import { Label } from '@/components/ui/label';
 import { TfiTrash } from 'react-icons/tfi';
 import { deleteUpfrontTrack } from '@/actions/upfront-tracks/DeleteUpfrontTrack';
+import { getArtist } from '@/actions/shared/GetArtist';
+import { addArtist } from '@/actions/shared/AddArtist';
+import { reactSelectStyle } from '@/lib/utils';
 
 interface TrackItemProps {
   track: UserTrack;
@@ -65,7 +68,55 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   const [allOptions, setAllOptions] = useState<
     { value: string; label: string }[]
   >([]);
+  const [artistOptions, setArtistOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [mixes, setMixes] = useState<Mix[]>([]);
+  const [searchArtist, setSearchArtist] = useState('');
+  const [selectArtist, setSelectArtist] = useState<{
+    value: string;
+    label: string;
+  }>({
+    value: track?.artists?.id || '',
+    label: track?.artists?.name || '',
+  });
+  const [artists, setArtists] = useState<Artist[]>([]);
+
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const data = await getArtist({
+          search: searchArtist,
+          page: '1',
+          trackId: track.trackId || '',
+        });
+        setArtists(data.artists);
+      } catch (err) {
+        toast.error('Failed to fetch artists');
+      }
+    };
+    fetchArtists();
+  }, [track.trackId, searchArtist]);
+
+  useEffect(() => {
+    const fetchMixes = async () => {
+      try {
+        const data = await getMix({
+          search: searchTerm,
+          page: '1',
+          trackId: track.trackId || '',
+        });
+        setMixes(data.mixes);
+      } catch (err) {
+        toast.error('Failed to fetch mixes');
+      }
+    };
+
+    fetchMixes();
+  }, [track.trackId, searchTerm]);
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useMixes(searchTerm);
 
@@ -84,7 +135,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
         trackId: editedTrack?.trackId || '',
         mixIds: selectedMixes.map((item) => item.value || ''),
         title: trackTitle || '',
-        artist: editedTrack?.artist !== null ? editedTrack?.artist : '',
+        artistId: selectArtist?.value || '',
       });
       if (refetch) {
         refetch();
@@ -141,10 +192,10 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   };
 
   const options = useMemo(() => {
-    if (!data) return allOptions;
+    if (!mixes) return allOptions;
 
-    const fetchedOptions = data.pages.flatMap((page) =>
-      page.mixes.map((mix) => ({
+    const fetchedOptions = mixes.flatMap((page) =>
+      mixes.map((mix) => ({
         value: mix.id,
         label: mix.title,
       }))
@@ -156,7 +207,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     });
 
     return Array.from(uniqueOptions.values());
-  }, [data, allOptions]);
+  }, [mixes, allOptions]);
 
   const loadOptions = async (
     inputValue: string
@@ -165,9 +216,56 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     return options;
   };
 
+  const artistsOptions = useMemo(() => {
+    if (!artists) return artistOptions;
+
+    const fetchedOptions = artists.flatMap((page) =>
+      artists.map((artist) => ({
+        value: artist.id,
+        label: artist.name,
+      }))
+    );
+
+    const uniqueOptions = new Map();
+    [...fetchedOptions, ...artistOptions].forEach((option) => {
+      uniqueOptions.set(option.value, option);
+    });
+
+    return Array.from(uniqueOptions.values());
+  }, [artists, artistOptions]);
+
+  const loadArtistsOptions = async (
+    inputValue: string
+  ): Promise<{ label: string; value: string }[]> => {
+    setSearchArtist(inputValue);
+    return artistsOptions;
+  };
+
+  const handleCreateArtist = async (inputValue: string) => {
+    console.log({ inputValue });
+    try {
+      const newArtist = await addArtist({
+        name: inputValue,
+        trackId: track.trackId || '',
+      });
+      const newOption = { value: newArtist.id, label: newArtist.name };
+
+      setArtistOptions((prev) => [...prev, newOption]);
+      setSelectArtist(newOption);
+
+      toast.success('Artist created successfully!');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Something went wrong';
+      toast.error(message);
+    }
+  };
+
   const handleCreateMix = async (inputValue: string) => {
     try {
-      const newMix = await addMix({ title: inputValue });
+      const newMix = await addMix({
+        title: inputValue,
+        trackId: track.trackId || '',
+      });
       const newOption = { value: newMix.id, label: newMix.title };
 
       // Update options and selected mixes
@@ -209,35 +307,40 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       {isEditing ? (
         <div className='flex-1 space-y-2'>
           <div className='w-full flex flex-col lg:flex-row gap-2 lg:gap-4'>
-            <div>
+            <div className='w-full'>
               <Label>Title</Label>
               <Input
                 placeholder='Title'
                 value={trackTitle}
                 onChange={(e) => setTrackTitle(e.target.value)}
+                disabled
               />
             </div>
-            <div>
+            <div className='w-full'>
               <Label>Artist</Label>
-              <Input
-                placeholder='Artist'
-                value={editedTrack?.artist || ''}
-                onChange={(e) =>
-                  setEditedTrack((prev) => {
-                    if (!prev) return prev;
-                    return {
-                      ...prev,
-                      artist: e.target.value,
-                      createdAt: prev.createdAt ?? new Date(),
-                      updatedAt: new Date(),
-                    };
-                  })
-                }
+              <Select
+                cacheOptions
+                defaultOptions
+                loadOptions={loadArtistsOptions}
+                onCreateOption={handleCreateArtist}
+                value={selectArtist}
+                onChange={(
+                  newValue: { label: string; value: string } | null,
+                  actionMeta: ActionMeta<{ label: string; value: string }>
+                ) => {
+                  setSelectArtist(newValue || { label: '', value: '' });
+                }}
+                placeholder='Search or create artist'
+                className='w-full'
+                styles={reactSelectStyle}
               />
             </div>
           </div>
           <div>
-            <Label>Label</Label>
+            <Label>
+              Label{' '}
+              <span className='text-xs text-muted-foreground'>(optional)</span>
+            </Label>
             <Input
               placeholder='Label'
               value={editedTrack?.label || ''}
@@ -276,45 +379,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
               }}
               placeholder='Search or create mixes'
               className='w-full'
-              styles={{
-                control: (provided, state) => ({
-                  ...provided,
-
-                  minHeight: '2rem',
-                  borderRadius: '0.375rem',
-                  border: state.isFocused
-                    ? '1px solid #5b6371'
-                    : '1px solid #D1D5DB',
-                  backgroundColor: 'transparent',
-                  fontSize: '0.875rem',
-                  boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                  '&:hover': {
-                    borderColor: state.isFocused ? '#9CA3AF' : '#D1D5DB',
-                  },
-                }),
-                input: (provided) => ({
-                  ...provided,
-                  padding: '',
-                  fontSize: '16px',
-                }),
-                placeholder: (provided) => ({
-                  ...provided,
-                  color: '#9CA3AF',
-                }),
-                singleValue: (provided) => ({
-                  ...provided,
-                  color: '#1F2937',
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isSelected ? '#6B7280' : 'transparent',
-                  color: state.isSelected ? '#FFFFFF' : '#1F2937',
-                  '&:hover': {
-                    backgroundColor: '#6B7280',
-                    color: '#FFFFFF',
-                  },
-                }),
-              }}
+              styles={reactSelectStyle}
             />
           </div>
         </div>
@@ -327,8 +392,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
               .filter(Boolean)
               .join(', ')}
           </span>
-          <span className='truncate'>{track?.artist}</span>
-          {/* <span>{track.releaseDate}</span> */}
+          <span className='truncate'>{track?.artists?.name}</span>
         </div>
       )}
 

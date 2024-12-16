@@ -62,6 +62,7 @@ export const fetchUpfrontTracks = async (data: string) => {
             mix: true,
           },
         },
+        artists: true,
       },
     });
 

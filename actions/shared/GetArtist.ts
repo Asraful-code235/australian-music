@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 
-export const getMix = async ({
+export const getArtist = async ({
   search = '',
   page = '1',
   trackId,
@@ -10,24 +10,24 @@ export const getMix = async ({
   const pageNumber = parseInt(page) || 1;
   const limit = 10;
 
-  const count = await db.mix.count({
+  const count = await db.artist.count({
     where: {
       AND: [
         {
           trackId: trackId,
         },
-        { OR: [{ title: { contains: search, mode: 'insensitive' } }] },
+        { OR: [{ name: { contains: search, mode: 'insensitive' } }] },
       ],
     },
   });
   const totalPages = Math.ceil(count / limit);
-  const mixes = await db.mix.findMany({
+  const artists = await db.artist.findMany({
     where: {
       AND: [
         {
           trackId: trackId,
         },
-        { OR: [{ title: { contains: search, mode: 'insensitive' } }] },
+        { OR: [{ name: { contains: search, mode: 'insensitive' } }] },
       ],
     },
     skip: (pageNumber - 1) * limit,
@@ -37,12 +37,14 @@ export const getMix = async ({
     },
   });
 
+  console.log({ trackId, artists });
+
   return {
     count,
     page: pageNumber,
     limit,
     totalPages,
-    mixes,
+    artists,
     check: trackId,
   };
 };

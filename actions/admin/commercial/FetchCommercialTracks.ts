@@ -62,6 +62,7 @@ export const fetchCommercialTracks = async (data: string) => {
             mix: true,
           },
         },
+        artists: true,
       },
     });
 

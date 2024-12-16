@@ -70,7 +70,7 @@ export const exportToCSV = (data: PaginatedTracks, filename: string) => {
       item.mixes?.map((mix) => mix?.mix?.title)?.join('; ') || '';
     return [
       item.position,
-      item.artist,
+      item.artists?.name || '',
       dayjs(item.createdAt).format('DD-MM-YYYY'),
       dayjs(item.updatedAt).format('DD-MM-YYYY'),
       item.user?.name,
@@ -127,4 +127,42 @@ export const gigsCsv = (data: GigsDataResponse, filename: string) => {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+};
+
+//@ts-ignore
+export const reactSelectStyle = {
+  control: (provided: any, state: any) => ({
+    ...provided,
+    minHeight: '2rem',
+    borderRadius: '0.375rem',
+    border: state.isFocused ? '1px solid #5b6371' : '1px solid #D1D5DB',
+    backgroundColor: 'transparent',
+    fontSize: '0.875rem',
+    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    '&:hover': {
+      borderColor: state.isFocused ? '#9CA3AF' : '#D1D5DB',
+    },
+  }),
+  input: (provided: any) => ({
+    ...provided,
+    padding: '',
+    fontSize: '16px',
+  }),
+  placeholder: (provided: any) => ({
+    ...provided,
+    color: '#9CA3AF',
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    color: '#1F2937',
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: state.isSelected ? '#6B7280' : 'transparent',
+    color: state.isSelected ? '#FFFFFF' : '#1F2937',
+    '&:hover': {
+      backgroundColor: '#6B7280',
+      color: '#FFFFFF',
+    },
+  }),
 };

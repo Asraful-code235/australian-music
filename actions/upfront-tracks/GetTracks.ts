@@ -15,6 +15,7 @@ export async function getTracks(id: string | undefined) {
             mix: true,
           },
         },
+        artists: true,
       },
     });
 
