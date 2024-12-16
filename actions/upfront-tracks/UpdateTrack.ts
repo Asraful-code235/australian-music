@@ -7,7 +7,7 @@ type UpdateUpfrontMixParams = {
   upfrontId: string;
   trackId: string;
   title?: string;
-  artist?: string;
+  artistId?: string;
   mixIds?: string[];
 };
 
@@ -15,7 +15,7 @@ export async function updateUpfrontTrackWithMixes({
   upfrontId,
   trackId,
   title,
-  artist,
+  artistId,
   mixIds,
 }: UpdateUpfrontMixParams) {
   return await db.$transaction(async (tx) => {
@@ -36,11 +36,11 @@ export async function updateUpfrontTrackWithMixes({
       });
     }
 
-    if (artist !== undefined) {
+    if (artistId !== undefined) {
       await tx.upfrontTrack.update({
         where: { id: upfrontId },
         data: {
-          artist,
+          artistId,
         },
       });
     }

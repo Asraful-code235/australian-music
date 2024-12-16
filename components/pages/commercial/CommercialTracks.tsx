@@ -188,8 +188,8 @@ export default function CommercialPage() {
   const handleError = (): Array<boolean> | undefined => {
     const errorArray = tracks?.map((item) => {
       return (
-        item.artist === null ||
-        item.artist === '' ||
+        item.artists?.name === null ||
+        item.artists?.name === '' ||
         item?.track?.title === null ||
         !item.mixes ||
         item.mixes.length < 1

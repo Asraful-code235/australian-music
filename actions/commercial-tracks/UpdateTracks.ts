@@ -6,7 +6,7 @@ type UpdateUpfrontMixParams = {
   commercialId: string;
   trackId: string;
   title?: string;
-  artist?: string;
+  artistId?: string;
   mixIds?: string[];
   label?: string;
 };
@@ -15,7 +15,7 @@ export async function updateUpfrontTrackWithMixes({
   commercialId,
   trackId,
   title,
-  artist,
+  artistId,
   mixIds,
   label,
 }: UpdateUpfrontMixParams) {
@@ -37,11 +37,11 @@ export async function updateUpfrontTrackWithMixes({
       });
     }
 
-    if (artist !== undefined) {
+    if (artistId !== undefined) {
       await tx.commercialTrack.update({
         where: { id: commercialId },
         data: {
-          artist,
+          artistId,
           label,
         },
       });

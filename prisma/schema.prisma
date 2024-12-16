@@ -46,10 +46,22 @@ model User {
 model Mix {
   id        String        @id @default(auto()) @map("_id") @db.ObjectId
   title     String
+  trackId  String   @db.ObjectId
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   upfrontTracks    UpfrontMixTrack[]    @relation("MixTracks")
   commercialTracks    CommercialMixTrack[]    @relation("MixTracks")
+}
+
+model Artist {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  trackId         String            @db.ObjectId
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  upfrontTrack    UpfrontTrack[]    @relation("upfrontArtist")
+  commercialTrack CommercialTrack[] @relation("commercialArtist")
 }
 
 model Tracks {
@@ -66,43 +78,48 @@ model Tracks {
 }
 
 model UpfrontTrack {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String   @db.ObjectId
-  trackId  String   @db.ObjectId
-  artist      String?
-  label String?
-  isExport   Boolean?@default(false)
-  status      Boolean? @default(false)
-  position    Int?
-   orderIndex Int?
- 
-  user     User     @relation("upfrontTrack",fields: [userId], references: [id], onDelete: Cascade)
-  track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  trackId    String   @db.ObjectId
+  artistId   String?  @db.ObjectId  
+  artist     String?
+  label      String?
+  isExport   Boolean? @default(false)
+  status     Boolean? @default(false)
+  position   Int?
+  orderIndex Int?
 
-  mixes UpfrontMixTrack[] @relation("upfrontTrackMixes")
+  user       User     @relation("upfrontTrack", fields: [userId], references: [id], onDelete: Cascade)
+  track      Tracks   @relation("userTracks", fields: [trackId], references: [id], onDelete: Cascade)
+  artists    Artist?   @relation("upfrontArtist", fields: [artistId], references: [id], onDelete: Cascade) 
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mixes      UpfrontMixTrack[] @relation("upfrontTrackMixes")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model CommercialTrack {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String   @db.ObjectId
-  trackId  String   @db.ObjectId
-  artist      String?
-  label     String?
-  isExport   Boolean?@default(false)
-  status      Boolean? @default(false)
-  position    Int?
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  trackId    String   @db.ObjectId
+  artistId   String?  @db.ObjectId   
+  label      String?
+  isExport   Boolean? @default(false)
+  status     Boolean? @default(false)
+  position   Int?
   orderIndex Int?
-  user     User     @relation("commercialTrack",fields: [userId], references: [id], onDelete: Cascade)
-  track    Tracks    @relation("userTracks",fields: [trackId], references: [id], onDelete: Cascade)
 
-  mixes CommercialMixTrack[] @relation("commercialTrackMixes")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user       User      @relation("commercialTrack", fields: [userId], references: [id], onDelete: Cascade)
+  track      Tracks    @relation("userTracks", fields: [trackId], references: [id], onDelete: Cascade)
+  artists    Artist?   @relation("commercialArtist", fields: [artistId], references: [id], onDelete: Cascade)
+
+  mixes      CommercialMixTrack[] @relation("commercialTrackMixes")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
+
 
 model UpfrontMixTrack {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId

@@ -2,16 +2,16 @@
 
 import { db } from '@/db';
 
-export async function addMix({
-  title,
+export async function addArtist({
+  name,
   trackId,
 }: {
-  title: string;
+  name: string;
   trackId: string;
 }) {
   try {
-    const newMix = await db.mix.create({
-      data: { title, trackId },
+    const newMix = await db.artist.create({
+      data: { name, trackId },
     });
     return newMix;
   } catch (error) {
