@@ -28,7 +28,7 @@ export const getErrorMessage = (error: unknown) => {
   return message;
 };
 
-export const TracksLimit = 3;
+export const TracksLimit = 20;
 
 export function generateQueryString(params: any) {
   const isEmpty = Object.values(params).every((value) => value === '');
