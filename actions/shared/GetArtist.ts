@@ -37,8 +37,6 @@ export const getArtist = async ({
     },
   });
 
-  console.log({ trackId, artists });
-
   return {
     count,
     page: pageNumber,

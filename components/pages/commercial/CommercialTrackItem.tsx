@@ -22,7 +22,7 @@ import Select from 'react-select/async-creatable';
 import { getMix } from '@/actions/shared/GetMix';
 
 import { addMix } from '@/actions/shared/AddMix';
-import { updateUpfrontTrackWithMixes } from '@/actions/commercial-tracks/UpdateTracks';
+import { updateCommercialTrackWithMixes } from '@/actions/commercial-tracks/UpdateTracks';
 import { TfiTrash } from 'react-icons/tfi';
 import { deleteCommercialTrack } from '@/actions/commercial-tracks/DeleteCommercialTrack';
 import { Label } from '@/components/ui/label';
@@ -121,7 +121,7 @@ export function CommercialTrackItem({
 
     try {
       if (!editedTrack) return;
-      await updateUpfrontTrackWithMixes({
+      await updateCommercialTrackWithMixes({
         commercialId: editedTrack?.id,
         trackId: editedTrack?.trackId || '',
         label: editedTrack?.label || '',

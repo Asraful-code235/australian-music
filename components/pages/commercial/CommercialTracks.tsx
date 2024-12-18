@@ -34,6 +34,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { SearchTrack } from '@/actions/shared/SearchTrack';
 import { addSearchedTrack } from '@/actions/commercial-tracks/AddSearchedTrack';
 import { ImportCommercialTracks } from '@/actions/commercial-tracks/ImportCommercialTracks';
+import { checkImport } from '@/actions/commercial-tracks/checkImport';
 
 export default function CommercialPage() {
   const { data: session, status } = useSession();
@@ -50,9 +51,22 @@ export default function CommercialPage() {
     error: trackError,
     refetch,
   } = useQuery({
-    queryKey: ['upfront-tracks'],
+    queryKey: ['commercial-tracks'],
     queryFn: () =>
       getTracks(session?.user.id)
+        .then((data) => data)
+        .catch((error) => console.error(error)),
+  });
+
+  const {
+    isLoading: trackImportCheckLoading,
+    data: trackImportCheck,
+    error: trackImportCheckError,
+    refetch: trackImportCheckRefetch,
+  } = useQuery({
+    queryKey: ['commercial-tracks-import-check'],
+    queryFn: () =>
+      checkImport(session?.user.id || '')
         .then((data) => data)
         .catch((error) => console.error(error)),
   });
@@ -112,6 +126,7 @@ export default function CommercialPage() {
     try {
       await ImportCommercialTracks(session?.user?.id);
       refetch();
+      trackImportCheckRefetch();
       toast.success('Tracks imported successfully');
     } catch (error) {
       toast.error('Failed to import tracks');
@@ -177,6 +192,7 @@ export default function CommercialPage() {
     try {
       await updateTrackStatus(tracks.slice(0, TracksLimit));
       refetch();
+      trackImportCheckRefetch();
       toast.success('Playlist saved successfully');
     } catch (error) {
       toast.error('Failed to save playlist');
@@ -263,7 +279,11 @@ export default function CommercialPage() {
             )}
           </div>
           <div>
-            <Button size='lg' onClick={handleImport}>
+            <Button
+              size='lg'
+              onClick={handleImport}
+              disabled={!trackImportCheck || trackImportCheckLoading}
+            >
               Import
             </Button>
           </div>
