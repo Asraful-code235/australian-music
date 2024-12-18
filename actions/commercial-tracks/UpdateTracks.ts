@@ -11,7 +11,7 @@ type UpdateUpfrontMixParams = {
   label?: string;
 };
 
-export async function updateUpfrontTrackWithMixes({
+export async function updateCommercialTrackWithMixes({
   commercialId,
   trackId,
   title,
@@ -38,6 +38,10 @@ export async function updateUpfrontTrackWithMixes({
     }
 
     if (artistId !== undefined) {
+      if (artistId === '') {
+        throw new Error('Artist field is required');
+      }
+
       await tx.commercialTrack.update({
         where: { id: commercialId },
         data: {
@@ -48,18 +52,24 @@ export async function updateUpfrontTrackWithMixes({
     }
 
     if (mixIds !== undefined) {
+      if (mixIds.length === 0) {
+        throw new Error('Mixes field is required');
+      }
+
+      if (mixIds.some((mixId) => mixId === '')) {
+        throw new Error('Mixes field is required');
+      }
+
       await tx.commercialMixTrack.deleteMany({
         where: { commercialTrackId: commercialId },
       });
 
-      if (mixIds.length > 0) {
-        await tx.commercialMixTrack.createMany({
-          data: mixIds.map((mixId) => ({
-            commercialTrackId: commercialId,
-            mixId,
-          })),
-        });
-      }
+      await tx.commercialMixTrack.createMany({
+        data: mixIds.map((mixId) => ({
+          commercialTrackId: commercialId,
+          mixId,
+        })),
+      });
     }
 
     return {

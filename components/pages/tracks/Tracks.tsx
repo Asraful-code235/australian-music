@@ -33,6 +33,7 @@ import { addSearchedTrack } from '@/actions/upfront-tracks/AddSearchTrack';
 import { useDebouncedCallback } from 'use-debounce';
 import { SearchTrack } from '@/actions/shared/SearchTrack';
 import { ImportUpfrontTracks } from '@/actions/upfront-tracks/ImportUpfrontTracks';
+import { checkImport } from '@/actions/upfront-tracks/checkImport';
 
 export default function TracksPage() {
   const { data: session, status } = useSession();
@@ -52,6 +53,19 @@ export default function TracksPage() {
     queryKey: ['upfront-tracks'],
     queryFn: () =>
       getTracks(session?.user.id)
+        .then((data) => data)
+        .catch((error) => console.error(error)),
+  });
+
+  const {
+    isLoading: trackImportCheckLoading,
+    data: trackImportCheck,
+    error: trackImportCheckError,
+    refetch: trackImportCheckRefetch,
+  } = useQuery({
+    queryKey: ['upfront-tracks-import-check'],
+    queryFn: () =>
+      checkImport(session?.user.id || '')
         .then((data) => data)
         .catch((error) => console.error(error)),
   });
@@ -154,6 +168,7 @@ export default function TracksPage() {
     try {
       await ImportUpfrontTracks(session?.user?.id);
       refetch();
+      trackImportCheckRefetch();
       toast.success('Track imported successfully');
     } catch (error) {
       toast.error('Failed to import tracks');
@@ -184,6 +199,7 @@ export default function TracksPage() {
     try {
       await updateTrackStatus(tracks.slice(0, TracksLimit));
       refetch();
+      trackImportCheckRefetch();
       toast.success('Playlist saved successfully');
     } catch (error) {
       toast.error('Failed to save playlist');
@@ -270,7 +286,11 @@ export default function TracksPage() {
             )}
           </div>
           <div>
-            <Button size='lg' onClick={handleImport}>
+            <Button
+              size='lg'
+              onClick={handleImport}
+              disabled={!trackImportCheck || trackImportCheckLoading}
+            >
               Import
             </Button>
           </div>

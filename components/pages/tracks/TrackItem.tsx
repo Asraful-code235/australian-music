@@ -242,7 +242,6 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   };
 
   const handleCreateArtist = async (inputValue: string) => {
-    console.log({ inputValue });
     try {
       const newArtist = await addArtist({
         name: inputValue,
