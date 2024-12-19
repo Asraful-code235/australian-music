@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
@@ -90,6 +90,7 @@ export function CommercialTrackItem({
       toast.error('Failed to fetch artists');
     }
   };
+
   useEffect(() => {
     fetchArtists();
   }, [track.trackId, searchArtist]);
@@ -185,8 +186,10 @@ export function CommercialTrackItem({
     setIsFocused(false);
   };
 
-  const options = useMemo(() => {
-    if (!mixes) return allOptions;
+  const loadOptions = async (
+    inputValue: string
+  ): Promise<{ label: string; value: string }[]> => {
+    setSearchTerm(inputValue);
 
     const fetchedOptions = mixes.flatMap((page) =>
       mixes.map((mix) => ({
@@ -201,17 +204,12 @@ export function CommercialTrackItem({
     });
 
     return Array.from(uniqueOptions.values());
-  }, [mixes, allOptions]);
-
-  const loadOptions = async (
-    inputValue: string
-  ): Promise<{ label: string; value: string }[]> => {
-    setSearchTerm(inputValue);
-    return options;
   };
 
-  const artistsOptions = useMemo(() => {
-    if (!artists) return artistOptions;
+  const loadArtistsOptions = async (
+    inputValue: string
+  ): Promise<{ label: string; value: string }[]> => {
+    setSearchArtist(inputValue);
 
     const fetchedOptions = artists.flatMap((page) =>
       artists.map((artist) => ({
@@ -226,13 +224,6 @@ export function CommercialTrackItem({
     });
 
     return Array.from(uniqueOptions.values());
-  }, [artists, artistOptions]);
-
-  const loadArtistsOptions = async (
-    inputValue: string
-  ): Promise<{ label: string; value: string }[]> => {
-    setSearchArtist(inputValue);
-    return artistsOptions;
   };
 
   const handleCreateArtist = async (inputValue: string) => {
