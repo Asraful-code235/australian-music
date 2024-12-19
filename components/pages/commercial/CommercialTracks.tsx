@@ -35,7 +35,6 @@ import { SearchTrack } from '@/actions/shared/SearchTrack';
 import { addSearchedTrack } from '@/actions/commercial-tracks/AddSearchedTrack';
 import { ImportCommercialTracks } from '@/actions/commercial-tracks/ImportCommercialTracks';
 import { checkImport } from '@/actions/commercial-tracks/checkImport';
-import { useFetch } from '@/hooks/use-fetch';
 
 const fetchUsers = async (id: string) => {
   if (!id) return [];
