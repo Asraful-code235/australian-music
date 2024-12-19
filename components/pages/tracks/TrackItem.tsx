@@ -21,6 +21,7 @@ import { deleteUpfrontTrack } from '@/actions/upfront-tracks/DeleteUpfrontTrack'
 import { getArtist } from '@/actions/shared/GetArtist';
 import { addArtist } from '@/actions/shared/AddArtist';
 import { reactSelectStyle } from '@/lib/utils';
+import TracksLoading from '@/components/shared/loading/TracksLoading';
 
 interface TrackItemProps {
   track: UserTrack;
@@ -268,7 +269,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       : false;
   };
 
-  return (
+  return !isUpdateTrackPending ? (
     <div
       style={style}
       className='relative p-3 lg:p-4 flex items-center gap-2 lg:gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
@@ -304,6 +305,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
               <Select
                 cacheOptions
                 defaultOptions
+                isLoading={isPending}
                 loadOptions={loadArtistsOptions}
                 onCreateOption={handleCreateArtist}
                 value={selectArtist}
@@ -346,6 +348,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
               isMulti
               cacheOptions
               defaultOptions
+              isLoading={isPending}
               loadOptions={loadOptions}
               onCreateOption={handleCreateMix}
               value={selectedMixes}
@@ -411,5 +414,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
         )}
       </div>
     </div>
+  ) : (
+    <TracksLoading />
   );
 }
