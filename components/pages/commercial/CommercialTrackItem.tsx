@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label';
 import { getArtist } from '@/actions/shared/GetArtist';
 import { reactSelectStyle } from '@/lib/utils';
 import { addArtist } from '@/actions/shared/AddArtist';
+import CommercialTrackItemSkeleton from './CommercialTrackItemSkeleton';
 
 interface CommercialTrackItemProps {
   track: UserTrack;
@@ -49,6 +50,7 @@ export function CommercialTrackItem({
   const [isFocused, setIsFocused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isUpdateTrackPending, startUpdateTrackTransition] = useTransition();
   const [trackTitle, setTrackTitle] = useState(track?.track?.title || '');
   const [selectedMixes, setSelectedMixes] = useState(
     track?.mixes
@@ -121,26 +123,27 @@ export function CommercialTrackItem({
     if (!editedTrack) return;
 
     setIsEditing(false);
-
-    try {
-      if (!editedTrack) return;
-      await updateCommercialTrackWithMixes({
-        commercialId: editedTrack?.id,
-        trackId: editedTrack?.trackId || '',
-        label: editedTrack?.label || '',
-        mixIds: selectedMixes.map((item) => item.value || ''),
-        title: trackTitle || '',
-        artistId: selectArtist?.value || '',
-      });
-      if (refetch) {
-        refetch();
+    startUpdateTrackTransition(async () => {
+      try {
+        if (!editedTrack) return;
+        await updateCommercialTrackWithMixes({
+          commercialId: editedTrack?.id,
+          trackId: editedTrack?.trackId || '',
+          label: editedTrack?.label || '',
+          mixIds: selectedMixes.map((item) => item.value || ''),
+          title: trackTitle || '',
+          artistId: selectArtist?.value || '',
+        });
+        if (refetch) {
+          refetch();
+        }
+        toast.success('Track updated');
+      } catch (e) {
+        const errorMessage =
+          e instanceof Error ? e.message : 'Something went wrong';
+        toast.error(errorMessage);
       }
-      toast.success('Track updated');
-    } catch (e) {
-      const errorMessage =
-        e instanceof Error ? e.message : 'Something went wrong';
-      toast.error(errorMessage);
-    }
+    });
   };
 
   const handleDelete = async () => {
@@ -273,7 +276,7 @@ export function CommercialTrackItem({
       : false;
   };
 
-  return (
+  return !isUpdateTrackPending ? (
     <div
       style={style}
       className='relative p-3 lg:p-4 flex items-center gap-2 lg:gap-4 shadow bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  touch-none'
@@ -386,9 +389,15 @@ export function CommercialTrackItem({
       <div className='flex gap-1'>
         {isEditing ? (
           <>
-            <Button size='icon' variant='ghost' onClick={handleSave}>
+            <Button
+              size='icon'
+              variant='ghost'
+              onClick={handleSave}
+              disabled={isPending}
+            >
               <Save className='h-4 w-4' />
             </Button>
+
             <Button
               className='z-10'
               size='icon'
@@ -400,20 +409,15 @@ export function CommercialTrackItem({
           </>
         ) : (
           <>
-            {isPending ? (
-              <Button className='z-10' size='icon' variant='ghost' disabled>
-                <Loader2 className='h-4 w-4' />
-              </Button>
-            ) : (
-              <Button
-                className='z-10'
-                size='icon'
-                variant='ghost'
-                onClick={() => setIsEditing(true)}
-              >
-                <Edit className='h-4 w-4' />
-              </Button>
-            )}
+            <Button
+              className='z-10'
+              size='icon'
+              variant='ghost'
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className='h-4 w-4' />
+            </Button>
+
             <Button
               className='z-10'
               size='icon'
@@ -426,5 +430,7 @@ export function CommercialTrackItem({
         )}
       </div>
     </div>
+  ) : (
+    <CommercialTrackItemSkeleton />
   );
 }

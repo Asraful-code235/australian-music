@@ -54,7 +54,7 @@ export default function CommercialPage() {
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState([]);
-  const [trackNewLoading, setTrackNewLoading] = useState(false);
+  const [trackLoading, setTrackLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
   const [isPending, startTransition] = useTransition();
 
@@ -86,7 +86,7 @@ export default function CommercialPage() {
 
   const fetchCommercialTracks = async () => {
     if (!session?.user.id) return;
-    setTrackNewLoading(true);
+    setTrackLoading(true);
     try {
       const data = await getTracks(session.user.id);
       const typedTracksData = data.map((item) => ({
@@ -97,7 +97,7 @@ export default function CommercialPage() {
     } catch (error) {
       console.error('Error fetching tracks:', error);
     } finally {
-      setTrackNewLoading(false);
+      setTrackLoading(false);
     }
   };
 
