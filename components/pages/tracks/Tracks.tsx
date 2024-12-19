@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   DndContext,
@@ -62,6 +62,10 @@ export default function TracksPage() {
       setTrackLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchUpfrontTracks();
+  }, [session]);
 
   const {
     isLoading: trackImportCheckLoading,
