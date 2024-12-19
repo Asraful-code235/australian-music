@@ -111,6 +111,8 @@ export function CommercialTrackItem({
     fetchMixes();
   }, [track.trackId, searchTerm]);
 
+  console.log({ artistOptions, artists });
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: track.id });
 
@@ -240,7 +242,7 @@ export function CommercialTrackItem({
         trackId: track.trackId || '',
       });
       const newOption = { value: newArtist.id, label: newArtist.name };
-
+      console.log({ newArtist });
       setArtistOptions((prev) => [...prev, newOption]);
       setSelectArtist(newOption);
       toast.success('Artist created successfully!');
@@ -312,6 +314,7 @@ export function CommercialTrackItem({
               <Select
                 cacheOptions
                 defaultOptions
+                isClearable
                 loadOptions={loadArtistsOptions}
                 onCreateOption={handleCreateArtist}
                 value={selectArtist}
