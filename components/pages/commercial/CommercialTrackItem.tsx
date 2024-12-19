@@ -95,20 +95,19 @@ export function CommercialTrackItem({
     fetchArtists();
   }, [track.trackId, searchArtist]);
 
+  const fetchMixes = async () => {
+    try {
+      const data = await getMix({
+        search: searchTerm,
+        page: '1',
+        trackId: track.trackId || '',
+      });
+      setMixes(data.mixes);
+    } catch (err) {
+      toast.error('Failed to fetch mixes');
+    }
+  };
   useEffect(() => {
-    const fetchMixes = async () => {
-      try {
-        const data = await getMix({
-          search: searchTerm,
-          page: '1',
-          trackId: track.trackId || '',
-        });
-        setMixes(data.mixes);
-      } catch (err) {
-        toast.error('Failed to fetch mixes');
-      }
-    };
-
     fetchMixes();
   }, [track.trackId, searchTerm]);
 
@@ -257,6 +256,7 @@ export function CommercialTrackItem({
       setSelectedMixes((prev) => [...prev, newOption]);
 
       toast.success('Mix created successfully!');
+      fetchMixes();
     } catch (error) {
       toast.error('Failed to create mix.');
     }
