@@ -13,6 +13,7 @@ export async function addTracks({ title, userId, position }: Tracks) {
     const newTrack = await db.tracks.create({
       data: {
         title,
+        category: 'commercial',
       },
     });
 

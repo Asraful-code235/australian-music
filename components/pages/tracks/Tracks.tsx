@@ -125,7 +125,7 @@ export default function TracksPage() {
   );
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
-    const result = await SearchTrack(value);
+    const result = await SearchTrack(value, 'upfront');
     setSearchResult(result);
   }, 500);
 

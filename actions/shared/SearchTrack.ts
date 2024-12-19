@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 
-export async function SearchTrack(search: string) {
+export async function SearchTrack(search: string, category: string) {
   try {
     const searchTracks = await db.tracks.findMany({
       where: search
@@ -11,6 +11,7 @@ export async function SearchTrack(search: string) {
               contains: search,
               mode: 'insensitive',
             },
+            category,
           }
         : {},
     });
