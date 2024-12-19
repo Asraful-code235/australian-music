@@ -18,6 +18,11 @@ enum UserRole {
   USER
 }
 
+enum Category {
+  upfront
+  commercial
+}
+
 enum hasPlayed {
   yes
   no
@@ -67,7 +72,8 @@ model Artist {
 model Tracks {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
- 
+  category   String       @default("upfront")
+
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

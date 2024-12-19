@@ -144,7 +144,7 @@ export default function CommercialPage() {
   }, [commercialTracksData, refetch]);
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
-    const result = await SearchTrack(value);
+    const result = await SearchTrack(value, 'commercial');
     setSearchResult(result);
   }, 500);
 
