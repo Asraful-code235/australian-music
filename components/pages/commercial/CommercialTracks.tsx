@@ -22,7 +22,6 @@ import { toast } from 'sonner';
 
 import { useQuery } from '@tanstack/react-query';
 
-import AllTracks from '../tracks/AllTracks';
 import Loading from '../../shared/loading/Loading';
 import { getTracks } from '@/actions/commercial-tracks/GetTracks';
 import { updateTrackPosition } from '@/actions/commercial-tracks/UpdateTrackPosition';
@@ -36,40 +35,16 @@ import { addSearchedTrack } from '@/actions/commercial-tracks/AddSearchedTrack';
 import { ImportCommercialTracks } from '@/actions/commercial-tracks/ImportCommercialTracks';
 import { checkImport } from '@/actions/commercial-tracks/checkImport';
 
-const fetchUsers = async (id: string) => {
-  if (!id) return [];
-  try {
-    const response = await getTracks(id);
-    return response;
-  } catch (error) {
-    console.error('Error fetching tracks:', error);
-    throw error;
-  }
-};
-
 export default function CommercialPage() {
   const { data: session, status } = useSession();
 
   const [tracks, setTracks] = useState<UserTrack[]>([]);
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState([]);
+
   const [trackLoading, setTrackLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
   const [isPending, startTransition] = useTransition();
-
-  // const {
-  //   isLoading: trackLoading,
-  //   data: commercialTracksData,
-  //   error: trackError,
-  //   refetch,
-  // } = useQuery({
-  //   queryKey: ['commercial-tracks'],
-  //   queryFn: () =>
-  //     getTracks(session?.user.id)
-  //       .then((data) => data)
-  //       .catch((error) => console.error(error)),
-  // });
 
   const {
     isLoading: trackImportCheckLoading,
@@ -95,7 +70,7 @@ export default function CommercialPage() {
       }));
       setTracks(typedTracksData);
     } catch (error) {
-      console.error('Error fetching tracks:', error);
+      toast.error('Failed to fetch tracks');
     } finally {
       setTrackLoading(false);
     }
@@ -104,8 +79,6 @@ export default function CommercialPage() {
   useEffect(() => {
     fetchCommercialTracks();
   }, [session]);
-
-  console.log({ tracks });
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -143,7 +116,7 @@ export default function CommercialPage() {
         setSearch('');
         toast.success('Track added successfully');
       } catch (error) {
-        console.error('Error adding track:', error);
+        toast.error('Failed to add track');
       }
     });
   };
@@ -169,16 +142,6 @@ export default function CommercialPage() {
       toast.error('Failed to import tracks');
     }
   };
-
-  // useEffect(() => {
-  //   if (commercialTracksData) {
-  //     const typedTracksData = commercialTracksData.map((item: any) => ({
-  //       ...item,
-  //       position: item.position || 1,
-  //     })) as UserTrack[];
-  //     setTracks(typedTracksData);
-  //   }
-  // }, [commercialTracksData, refetch]);
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
     const result = await SearchTrack(value, 'commercial');

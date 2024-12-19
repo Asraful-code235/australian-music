@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   DndContext,
@@ -42,20 +42,26 @@ export default function TracksPage() {
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState([]);
+  const [trackLoading, setTrackLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
+  const [isPending, startTransition] = useTransition();
 
-  const {
-    isLoading: trackLoading,
-    data: tracksData,
-    error: trackError,
-    refetch,
-  } = useQuery({
-    queryKey: ['upfront-tracks'],
-    queryFn: () =>
-      getTracks(session?.user.id)
-        .then((data) => data)
-        .catch((error) => console.error(error)),
-  });
+  const fetchUpfrontTracks = async () => {
+    if (!session?.user.id) return;
+    setTrackLoading(true);
+    try {
+      const data = await getTracks(session.user.id);
+      const typedTracksData = data.map((item) => ({
+        ...item,
+        position: item.position || 1,
+      }));
+      setTracks(typedTracksData);
+    } catch (error) {
+      toast.error('Failed to fetch tracks');
+    } finally {
+      setTrackLoading(false);
+    }
+  };
 
   const {
     isLoading: trackImportCheckLoading,
@@ -87,7 +93,7 @@ export default function TracksPage() {
 
       setTracks(newTracks);
       await updateTrackPosition(newTracks);
-      refetch();
+      fetchUpfrontTracks();
     }
   };
 
@@ -101,20 +107,21 @@ export default function TracksPage() {
     }
 
     const position = tracks.length ? tracks.length + 1 : 1;
+    startTransition(async () => {
+      try {
+        const res = await addTracks({
+          title: search,
+          userId,
+          position,
+        });
 
-    try {
-      const res = await addTracks({
-        title: search,
-        userId,
-        position,
-      });
-
-      refetch();
-      setSearch('');
-      toast.success('Track added successfully');
-    } catch (error) {
-      console.error('Error adding track:', error);
-    }
+        fetchUpfrontTracks();
+        setSearch('');
+        toast.success('Track added successfully');
+      } catch (error) {
+        toast.error('Failed to add track');
+      }
+    });
   };
 
   const sensors = useSensors(
@@ -152,7 +159,7 @@ export default function TracksPage() {
         position,
       });
 
-      refetch();
+      fetchUpfrontTracks();
       setSearch('');
       toast.success('Track added successfully');
     } catch (error) {
@@ -167,7 +174,7 @@ export default function TracksPage() {
     }
     try {
       await ImportUpfrontTracks(session?.user?.id);
-      refetch();
+      fetchUpfrontTracks();
       trackImportCheckRefetch();
       toast.success('Track imported successfully');
     } catch (error) {
@@ -175,17 +182,7 @@ export default function TracksPage() {
     }
   };
 
-  useEffect(() => {
-    if (tracksData) {
-      const typedTracksData = tracksData.map((item: any) => ({
-        ...item,
-        position: item.position || 1,
-      })) as UserTrack[];
-      setTracks(typedTracksData);
-    }
-  }, [tracksData, refetch]);
-
-  if (status === 'loading' || trackLoading) {
+  if (status === 'loading') {
     return <Loading />;
   }
 
@@ -198,7 +195,7 @@ export default function TracksPage() {
     setIsSaving(true);
     try {
       await updateTrackStatus(tracks.slice(0, TracksLimit));
-      refetch();
+      fetchUpfrontTracks();
       trackImportCheckRefetch();
       toast.success('Playlist saved successfully');
     } catch (error) {
@@ -303,7 +300,7 @@ export default function TracksPage() {
         >
           <AllTracks
             tracks={tracks || []}
-            refetch={refetch}
+            refetch={fetchUpfrontTracks}
             error={handleError}
           />
         </DndContext>

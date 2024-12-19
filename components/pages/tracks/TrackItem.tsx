@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
@@ -10,11 +10,6 @@ import { GripVertical, Save, Edit, X } from 'lucide-react';
 import { Artist, Mix, Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
-import {
-  QueryObserverResult,
-  useInfiniteQuery,
-  useQuery,
-} from '@tanstack/react-query';
 import { getMix } from '@/actions/shared/GetMix';
 import { MultiValue, ActionMeta } from 'react-select';
 import { addMix } from '@/actions/shared/AddMix';
@@ -29,25 +24,10 @@ import { reactSelectStyle } from '@/lib/utils';
 
 interface TrackItemProps {
   track: UserTrack;
-  refetch?: () => Promise<QueryObserverResult>;
+  refetch?: () => Promise<void>;
   error: () => Array<boolean> | undefined;
   index: number;
 }
-
-const useMixes = (search: string) => {
-  return useInfiniteQuery({
-    queryKey: ['mixes', search],
-    queryFn: ({ pageParam = 1 }) =>
-      getMix({ search, page: pageParam.toString() }),
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.page < lastPage.totalPages) {
-        return lastPage.page + 1;
-      }
-      return undefined;
-    },
-    initialPageParam: 1,
-  });
-};
 
 export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -55,6 +35,8 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   const [isDragged, setIsDragged] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [isUpdateTrackPending, startUpdateTrackTransition] = useTransition();
   const [trackTitle, setTrackTitle] = useState(track?.track?.title || '');
   const [selectedMixes, setSelectedMixes] = useState(
     track?.mixes
@@ -84,41 +66,39 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   });
   const [artists, setArtists] = useState<Artist[]>([]);
 
+  const fetchArtists = async () => {
+    try {
+      const data = await getArtist({
+        search: searchArtist,
+        page: '1',
+        trackId: track.trackId || '',
+      });
+      setArtists(data.artists);
+    } catch (err) {
+      toast.error('Failed to fetch artists');
+    }
+  };
+
+  const fetchMixes = async () => {
+    try {
+      const data = await getMix({
+        search: searchTerm,
+        page: '1',
+        trackId: track.trackId || '',
+      });
+      setMixes(data.mixes);
+    } catch (err) {
+      toast.error('Failed to fetch mixes');
+    }
+  };
+
   useEffect(() => {
-    const fetchArtists = async () => {
-      try {
-        const data = await getArtist({
-          search: searchArtist,
-          page: '1',
-          trackId: track.trackId || '',
-        });
-        setArtists(data.artists);
-      } catch (err) {
-        toast.error('Failed to fetch artists');
-      }
-    };
     fetchArtists();
   }, [track.trackId, searchArtist]);
 
   useEffect(() => {
-    const fetchMixes = async () => {
-      try {
-        const data = await getMix({
-          search: searchTerm,
-          page: '1',
-          trackId: track.trackId || '',
-        });
-        setMixes(data.mixes);
-      } catch (err) {
-        toast.error('Failed to fetch mixes');
-      }
-    };
-
     fetchMixes();
   }, [track.trackId, searchTerm]);
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useMixes(searchTerm);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: track.id });
@@ -127,25 +107,27 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     if (!editedTrack) return;
 
     setIsEditing(false);
-
-    try {
-      if (!editedTrack) return;
-      await updateUpfrontTrackWithMixes({
-        upfrontId: editedTrack?.id,
-        trackId: editedTrack?.trackId || '',
-        mixIds: selectedMixes.map((item) => item.value || ''),
-        title: trackTitle || '',
-        artistId: selectArtist?.value || '',
-      });
-      if (refetch) {
-        refetch();
+    startUpdateTrackTransition(async () => {
+      try {
+        if (!editedTrack) return;
+        await updateUpfrontTrackWithMixes({
+          upfrontId: editedTrack?.id,
+          trackId: editedTrack?.trackId || '',
+          label: editedTrack?.label || '',
+          mixIds: selectedMixes.map((item) => item.value || ''),
+          title: trackTitle || '',
+          artistId: selectArtist?.value || '',
+        });
+        if (refetch) {
+          refetch();
+        }
+        toast.success('Track updated');
+      } catch (e) {
+        const errorMessage =
+          e instanceof Error ? e.message : 'Something went wrong';
+        toast.error(errorMessage);
       }
-      toast.success('Track updated');
-    } catch (e) {
-      const errorMessage =
-        e instanceof Error ? e.message : 'Something went wrong';
-      toast.error(errorMessage);
-    }
+    });
   };
 
   const handleDelete = async () => {
@@ -242,39 +224,41 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   };
 
   const handleCreateArtist = async (inputValue: string) => {
-    try {
-      const newArtist = await addArtist({
-        name: inputValue,
-        trackId: track.trackId || '',
-      });
-      const newOption = { value: newArtist.id, label: newArtist.name };
+    startTransition(async () => {
+      try {
+        const newArtist = await addArtist({
+          name: inputValue,
+          trackId: track.trackId || '',
+        });
+        const newOption = { value: newArtist.id, label: newArtist.name };
 
-      setArtistOptions((prev) => [...prev, newOption]);
-      setSelectArtist(newOption);
-
-      toast.success('Artist created successfully!');
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Something went wrong';
-      toast.error(message);
-    }
+        setArtistOptions((prev) => [...prev, newOption]);
+        setSelectArtist(newOption);
+        fetchArtists();
+        toast.success('Artist created successfully!');
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Something went wrong';
+        toast.error(message);
+      }
+    });
   };
 
   const handleCreateMix = async (inputValue: string) => {
-    try {
-      const newMix = await addMix({
-        title: inputValue,
-        trackId: track.trackId || '',
-      });
-      const newOption = { value: newMix.id, label: newMix.title };
-
-      // Update options and selected mixes
-      setAllOptions((prev) => [...prev, newOption]);
-      setSelectedMixes((prev) => [...prev, newOption]);
-
-      toast.success('Mix created successfully!');
-    } catch (error) {
-      toast.error('Failed to create mix.');
-    }
+    startTransition(async () => {
+      try {
+        const newMix = await addMix({
+          title: inputValue,
+          trackId: track.trackId || '',
+        });
+        const newOption = { value: newMix.id, label: newMix.title };
+        setAllOptions((prev) => [...prev, newOption]);
+        setSelectedMixes((prev) => [...prev, newOption]);
+        fetchMixes();
+        toast.success('Mix created successfully!');
+      } catch (error) {
+        toast.error('Failed to create mix.');
+      }
+    });
   };
 
   const fieldError = (): boolean => {
@@ -370,11 +354,6 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
                 actionMeta: ActionMeta<{ label: string; value: string }>
               ) => {
                 setSelectedMixes([...newValue]); // Convert readonly array to mutable array
-              }}
-              onMenuScrollToBottom={() => {
-                if (hasNextPage && !isFetchingNextPage) {
-                  fetchNextPage();
-                }
               }}
               placeholder='Search or create mixes'
               className='w-full'

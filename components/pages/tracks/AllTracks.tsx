@@ -8,7 +8,7 @@ import { QueryObserverResult } from '@tanstack/react-query';
 
 type AllTracksProps = {
   tracks?: UserTrack[];
-  refetch?: () => Promise<QueryObserverResult>;
+  refetch?: () => Promise<void>;
   error: () => Array<boolean> | undefined;
 };
 

@@ -10,12 +10,6 @@ import { GripVertical, Save, Edit, X, Loader2 } from 'lucide-react';
 import { Artist, Mix, Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
-import {
-  QueryObserverResult,
-  useInfiniteQuery,
-  useQuery,
-} from '@tanstack/react-query';
-
 import { MultiValue, ActionMeta } from 'react-select';
 
 import Select from 'react-select/async-creatable';
@@ -29,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { getArtist } from '@/actions/shared/GetArtist';
 import { reactSelectStyle } from '@/lib/utils';
 import { addArtist } from '@/actions/shared/AddArtist';
-import CommercialTrackItemSkeleton from './CommercialTrackItemSkeleton';
+import TracksLoading from '@/components/shared/loading/TracksLoading';
 
 interface CommercialTrackItemProps {
   track: UserTrack;
@@ -113,8 +107,6 @@ export function CommercialTrackItem({
   useEffect(() => {
     fetchMixes();
   }, [track.trackId, searchTerm]);
-
-  console.log({ artistOptions, artists });
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: track.id });
@@ -237,7 +229,7 @@ export function CommercialTrackItem({
           trackId: track.trackId || '',
         });
         const newOption = { value: newArtist.id, label: newArtist.name };
-        console.log({ newArtist });
+
         setArtistOptions((prev) => [...prev, newOption]);
         setSelectArtist(newOption);
         toast.success('Artist created successfully!');
@@ -431,6 +423,6 @@ export function CommercialTrackItem({
       </div>
     </div>
   ) : (
-    <CommercialTrackItemSkeleton />
+    <TracksLoading />
   );
 }
