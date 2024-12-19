@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   DndContext,
@@ -56,6 +56,7 @@ export default function CommercialPage() {
   const [error, setError] = useState([]);
   const [trackNewLoading, setTrackNewLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
+  const [isPending, startTransition] = useTransition();
 
   // const {
   //   isLoading: trackLoading,
@@ -135,15 +136,16 @@ export default function CommercialPage() {
       return;
     }
     const position = tracks.length ? tracks.length + 1 : 1;
-    try {
-      const res = await addTracks({ title: search, userId, position });
-
-      fetchCommercialTracks();
-      setSearch('');
-      toast.success('Track added successfully');
-    } catch (error) {
-      console.error('Error adding track:', error);
-    }
+    startTransition(async () => {
+      try {
+        await addTracks({ title: search, userId, position });
+        fetchCommercialTracks();
+        setSearch('');
+        toast.success('Track added successfully');
+      } catch (error) {
+        console.error('Error adding track:', error);
+      }
+    });
   };
 
   const sensors = useSensors(
@@ -304,9 +306,19 @@ export default function CommercialPage() {
                       variant='ghost'
                       className='w-full justify-start'
                       onClick={handleAddTrack}
+                      disabled={isPending}
                     >
-                      <Plus className='mr-2 h-4 w-4' />
-                      Create &quot;{search}&quot;
+                      {isPending ? (
+                        <span className='flex items-center gap-1'>
+                          <Loader2 className='animate-spin mr-2 h-4 w-4' />{' '}
+                          Adding...
+                        </span>
+                      ) : (
+                        <span className='flex items-center'>
+                          <Plus className='mr-2 h-4 w-4' />
+                          Create &quot;{search}&quot;
+                        </span>
+                      )}
                     </Button>
                   </div>
                 )}

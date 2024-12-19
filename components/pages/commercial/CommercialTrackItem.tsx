@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Save, Edit, X } from 'lucide-react';
+import { GripVertical, Save, Edit, X, Loader2 } from 'lucide-react';
 import { Artist, Mix, Tracks, UserTrack } from '@/types/track';
 import { toast } from 'sonner';
 
@@ -48,6 +48,7 @@ export function CommercialTrackItem({
   const [isDragged, setIsDragged] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [trackTitle, setTrackTitle] = useState(track?.track?.title || '');
   const [selectedMixes, setSelectedMixes] = useState(
     track?.mixes
@@ -226,40 +227,43 @@ export function CommercialTrackItem({
   };
 
   const handleCreateArtist = async (inputValue: string) => {
-    try {
-      const newArtist = await addArtist({
-        name: inputValue,
-        trackId: track.trackId || '',
-      });
-      const newOption = { value: newArtist.id, label: newArtist.name };
-      console.log({ newArtist });
-      setArtistOptions((prev) => [...prev, newOption]);
-      setSelectArtist(newOption);
-      toast.success('Artist created successfully!');
-      fetchArtists();
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Something went wrong';
-      toast.error(message);
-    }
+    startTransition(async () => {
+      try {
+        const newArtist = await addArtist({
+          name: inputValue,
+          trackId: track.trackId || '',
+        });
+        const newOption = { value: newArtist.id, label: newArtist.name };
+        console.log({ newArtist });
+        setArtistOptions((prev) => [...prev, newOption]);
+        setSelectArtist(newOption);
+        toast.success('Artist created successfully!');
+        fetchArtists();
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Something went wrong';
+        toast.error(message);
+      }
+    });
   };
 
   const handleCreateMix = async (inputValue: string) => {
-    try {
-      const newMix = await addMix({
-        title: inputValue,
-        trackId: track.trackId || '',
-      });
-      const newOption = { value: newMix.id, label: newMix.title };
+    startTransition(async () => {
+      try {
+        const newMix = await addMix({
+          title: inputValue,
+          trackId: track.trackId || '',
+        });
+        const newOption = { value: newMix.id, label: newMix.title };
 
-      // Update options and selected mixes
-      setAllOptions((prev) => [...prev, newOption]);
-      setSelectedMixes((prev) => [...prev, newOption]);
+        setAllOptions((prev) => [...prev, newOption]);
+        setSelectedMixes((prev) => [...prev, newOption]);
 
-      toast.success('Mix created successfully!');
-      fetchMixes();
-    } catch (error) {
-      toast.error('Failed to create mix.');
-    }
+        toast.success('Mix created successfully!');
+        fetchMixes();
+      } catch (error) {
+        toast.error('Failed to create mix.');
+      }
+    });
   };
 
   const fieldError = (): boolean => {
@@ -306,6 +310,7 @@ export function CommercialTrackItem({
                 cacheOptions
                 defaultOptions
                 isClearable
+                isLoading={isPending}
                 loadOptions={loadArtistsOptions}
                 onCreateOption={handleCreateArtist}
                 value={selectArtist}
@@ -348,6 +353,7 @@ export function CommercialTrackItem({
               isMulti
               cacheOptions
               defaultOptions
+              isLoading={isPending}
               loadOptions={loadOptions}
               onCreateOption={handleCreateMix}
               value={selectedMixes}
@@ -394,14 +400,20 @@ export function CommercialTrackItem({
           </>
         ) : (
           <>
-            <Button
-              className='z-10'
-              size='icon'
-              variant='ghost'
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit className='h-4 w-4' />
-            </Button>
+            {isPending ? (
+              <Button className='z-10' size='icon' variant='ghost' disabled>
+                <Loader2 className='h-4 w-4' />
+              </Button>
+            ) : (
+              <Button
+                className='z-10'
+                size='icon'
+                variant='ghost'
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className='h-4 w-4' />
+              </Button>
+            )}
             <Button
               className='z-10'
               size='icon'
