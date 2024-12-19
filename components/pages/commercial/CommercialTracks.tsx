@@ -35,6 +35,18 @@ import { SearchTrack } from '@/actions/shared/SearchTrack';
 import { addSearchedTrack } from '@/actions/commercial-tracks/AddSearchedTrack';
 import { ImportCommercialTracks } from '@/actions/commercial-tracks/ImportCommercialTracks';
 import { checkImport } from '@/actions/commercial-tracks/checkImport';
+import { useFetch } from '@/hooks/use-fetch';
+
+const fetchUsers = async (id: string) => {
+  if (!id) return [];
+  try {
+    const response = await getTracks(id);
+    return response;
+  } catch (error) {
+    console.error('Error fetching tracks:', error);
+    throw error;
+  }
+};
 
 export default function CommercialPage() {
   const { data: session, status } = useSession();
@@ -43,20 +55,21 @@ export default function CommercialPage() {
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState([]);
+  const [trackNewLoading, setTrackNewLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
 
-  const {
-    isLoading: trackLoading,
-    data: commercialTracksData,
-    error: trackError,
-    refetch,
-  } = useQuery({
-    queryKey: ['commercial-tracks'],
-    queryFn: () =>
-      getTracks(session?.user.id)
-        .then((data) => data)
-        .catch((error) => console.error(error)),
-  });
+  // const {
+  //   isLoading: trackLoading,
+  //   data: commercialTracksData,
+  //   error: trackError,
+  //   refetch,
+  // } = useQuery({
+  //   queryKey: ['commercial-tracks'],
+  //   queryFn: () =>
+  //     getTracks(session?.user.id)
+  //       .then((data) => data)
+  //       .catch((error) => console.error(error)),
+  // });
 
   const {
     isLoading: trackImportCheckLoading,
@@ -70,6 +83,29 @@ export default function CommercialPage() {
         .then((data) => data)
         .catch((error) => console.error(error)),
   });
+
+  const fetchCommercialTracks = async () => {
+    if (!session?.user.id) return;
+    setTrackNewLoading(true);
+    try {
+      const data = await getTracks(session.user.id);
+      const typedTracksData = data.map((item) => ({
+        ...item,
+        position: item.position || 1,
+      }));
+      setTracks(typedTracksData);
+    } catch (error) {
+      console.error('Error fetching tracks:', error);
+    } finally {
+      setTrackNewLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCommercialTracks();
+  }, [session]);
+
+  console.log({ tracks });
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -88,7 +124,7 @@ export default function CommercialPage() {
 
       setTracks(newTracks);
       await updateTrackPosition(newTracks);
-      refetch();
+      fetchCommercialTracks();
     }
   };
 
@@ -103,7 +139,7 @@ export default function CommercialPage() {
     try {
       const res = await addTracks({ title: search, userId, position });
 
-      refetch();
+      fetchCommercialTracks();
       setSearch('');
       toast.success('Track added successfully');
     } catch (error) {
@@ -125,7 +161,7 @@ export default function CommercialPage() {
     }
     try {
       await ImportCommercialTracks(session?.user?.id);
-      refetch();
+      fetchCommercialTracks();
       trackImportCheckRefetch();
       toast.success('Tracks imported successfully');
     } catch (error) {
@@ -133,15 +169,15 @@ export default function CommercialPage() {
     }
   };
 
-  useEffect(() => {
-    if (commercialTracksData) {
-      const typedTracksData = commercialTracksData.map((item: any) => ({
-        ...item,
-        position: item.position || 1,
-      })) as UserTrack[];
-      setTracks(typedTracksData);
-    }
-  }, [commercialTracksData, refetch]);
+  // useEffect(() => {
+  //   if (commercialTracksData) {
+  //     const typedTracksData = commercialTracksData.map((item: any) => ({
+  //       ...item,
+  //       position: item.position || 1,
+  //     })) as UserTrack[];
+  //     setTracks(typedTracksData);
+  //   }
+  // }, [commercialTracksData, refetch]);
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
     const result = await SearchTrack(value, 'commercial');
@@ -170,7 +206,7 @@ export default function CommercialPage() {
         position,
       });
 
-      refetch();
+      fetchCommercialTracks();
       setSearch('');
       toast.success('Track added successfully');
     } catch (error) {
@@ -178,7 +214,7 @@ export default function CommercialPage() {
     }
   };
 
-  if (status === 'loading' || trackLoading) {
+  if (status === 'loading') {
     return <Loading />;
   }
 
@@ -191,7 +227,7 @@ export default function CommercialPage() {
     setIsSaving(true);
     try {
       await updateTrackStatus(tracks.slice(0, TracksLimit));
-      refetch();
+      fetchCommercialTracks();
       trackImportCheckRefetch();
       toast.success('Playlist saved successfully');
     } catch (error) {
@@ -296,7 +332,7 @@ export default function CommercialPage() {
         >
           <AllCommercialTracks
             tracks={tracks || []}
-            refetch={refetch}
+            refetch={fetchCommercialTracks}
             error={handleError}
           />
         </DndContext>

@@ -32,7 +32,7 @@ import { addArtist } from '@/actions/shared/AddArtist';
 
 interface CommercialTrackItemProps {
   track: UserTrack;
-  refetch?: () => Promise<QueryObserverResult>;
+  refetch?: () => Promise<void>;
   error: () => Array<boolean> | undefined;
   index: number;
 }

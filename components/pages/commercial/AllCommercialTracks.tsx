@@ -9,7 +9,7 @@ import { CommercialTrackItem } from './CommercialTrackItem';
 
 type AllCommercialTracksProps = {
   tracks?: UserTrack[];
-  refetch?: () => Promise<QueryObserverResult>;
+  refetch?: () => Promise<void>;
   error: () => Array<boolean> | undefined;
 };
 
