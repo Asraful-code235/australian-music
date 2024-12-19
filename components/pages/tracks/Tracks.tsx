@@ -277,9 +277,19 @@ export default function TracksPage() {
                       variant='ghost'
                       className='w-full justify-start'
                       onClick={handleAddTrack}
+                      disabled={isPending}
                     >
-                      <Plus className='mr-2 h-4 w-4' />
-                      Create &quot;{search}&quot;
+                      {isPending ? (
+                        <span className='flex items-center gap-1'>
+                          <Loader2 className='animate-spin mr-2 h-4 w-4' />{' '}
+                          Adding...
+                        </span>
+                      ) : (
+                        <span className='flex items-center'>
+                          <Plus className='mr-2 h-4 w-4' />
+                          Create &quot;{search}&quot;
+                        </span>
+                      )}
                     </Button>
                   </div>
                 )}
