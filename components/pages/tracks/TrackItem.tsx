@@ -111,18 +111,24 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     startUpdateTrackTransition(async () => {
       try {
         if (!editedTrack) return;
-        await updateUpfrontTrackWithMixes({
-          upfrontId: editedTrack?.id,
-          trackId: editedTrack?.trackId || '',
-          label: editedTrack?.label || '',
-          mixIds: selectedMixes.map((item) => item.value || ''),
-          title: trackTitle || '',
-          artistId: selectArtist?.value || '',
-        });
-        if (refetch) {
-          refetch();
+        if (selectArtist?.value === '') {
+          throw new Error('Artist field is required!');
+        } else if (selectedMixes.length === 0) {
+          throw new Error('Mixes field is required!');
+        } else {
+          await updateUpfrontTrackWithMixes({
+            upfrontId: editedTrack?.id,
+            trackId: editedTrack?.trackId || '',
+            label: editedTrack?.label || '',
+            mixIds: selectedMixes.map((item) => item.value || ''),
+            title: trackTitle || '',
+            artistId: selectArtist?.value || '',
+          });
+          if (refetch) {
+            refetch();
+          }
+          toast.success('Track updated');
         }
-        toast.success('Track updated');
       } catch (e) {
         const errorMessage =
           e instanceof Error ? e.message : 'Something went wrong';
