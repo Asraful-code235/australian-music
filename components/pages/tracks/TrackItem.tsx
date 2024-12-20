@@ -332,6 +332,7 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
               <Select
                 cacheOptions
                 defaultOptions
+                isClearable
                 isLoading={isPending}
                 loadOptions={loadArtistsOptions}
                 onCreateOption={handleCreateArtist}
@@ -407,7 +408,12 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
       <div className='flex gap-1'>
         {isEditing ? (
           <>
-            <Button size='icon' variant='ghost' onClick={handleSave}>
+            <Button
+              size='icon'
+              variant='ghost'
+              onClick={handleSave}
+              disabled={isPending}
+            >
               <Save className='h-4 w-4' />
             </Button>
             <Button
