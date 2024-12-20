@@ -108,14 +108,20 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
     if (!editedTrack) return;
 
     setIsEditing(false);
-    startUpdateTrackTransition(async () => {
-      try {
-        if (!editedTrack) return;
-        if (selectArtist?.value === '') {
-          throw new Error('Artist field is required!');
-        } else if (selectedMixes.length === 0) {
-          throw new Error('Mixes field is required!');
-        } else {
+
+    startUpdateTrackTransition(() => {
+      toast.promise(
+        (async () => {
+          if (!editedTrack) return;
+
+          if (selectArtist?.value === '') {
+            throw new Error('Artist field is required!');
+          }
+
+          if (selectedMixes.length === 0) {
+            throw new Error('Mixes field is required!');
+          }
+
           await updateUpfrontTrackWithMixes({
             upfrontId: editedTrack?.id,
             trackId: editedTrack?.trackId || '',
@@ -124,16 +130,18 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
             title: trackTitle || '',
             artistId: selectArtist?.value || '',
           });
+
           if (refetch) {
             refetch();
           }
-          toast.success('Track updated');
+        })(),
+        {
+          loading: 'Saving track...',
+          success: 'Track updated successfully!',
+          error: (e) =>
+            e instanceof Error ? e.message : 'Something went wrong',
         }
-      } catch (e) {
-        const errorMessage =
-          e instanceof Error ? e.message : 'Something went wrong';
-        toast.error(errorMessage);
-      }
+      );
     });
   };
 
@@ -232,17 +240,25 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
 
   const handleCreateArtist = async (inputValue: string) => {
     startTransition(async () => {
-      try {
-        const newArtist = await addArtist({
-          name: inputValue,
-          trackId: track.trackId || '',
-        });
-        const newOption = { value: newArtist.id, label: newArtist.name };
+      const promise = addArtist({
+        name: inputValue,
+        trackId: track.trackId || '',
+      });
 
-        setArtistOptions((prev) => [...prev, newOption]);
-        setSelectArtist(newOption);
-        fetchArtists();
-        toast.success('Artist created successfully!');
+      toast.promise(promise, {
+        loading: 'Creating artist...',
+        success: (newArtist) => {
+          const newOption = { value: newArtist.id, label: newArtist.name };
+          setArtistOptions((prev) => [...prev, newOption]);
+          setSelectArtist(newOption);
+          fetchArtists();
+          return 'Artist created successfully!';
+        },
+        error: 'Failed to create artist.',
+      });
+
+      try {
+        await promise;
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Something went wrong';
         toast.error(message);
@@ -251,20 +267,25 @@ export function TrackItem({ track, refetch, error, index }: TrackItemProps) {
   };
 
   const handleCreateMix = async (inputValue: string) => {
-    startTransition(async () => {
-      try {
-        const newMix = await addMix({
+    startTransition(() => {
+      toast.promise(
+        addMix({
           title: inputValue,
           trackId: track.trackId || '',
-        });
-        const newOption = { value: newMix.id, label: newMix.title };
-        setAllOptions((prev) => [...prev, newOption]);
-        setSelectedMixes((prev) => [...prev, newOption]);
-        fetchMixes();
-        toast.success('Mix created successfully!');
-      } catch (error) {
-        toast.error('Failed to create mix.');
-      }
+        }).then((newMix) => {
+          const newOption = { value: newMix.id, label: newMix.title };
+
+          setAllOptions((prev) => [...prev, newOption]);
+          setSelectedMixes((prev) => [...prev, newOption]);
+
+          fetchMixes();
+        }),
+        {
+          loading: 'Creating mix...',
+          success: 'Mix created successfully!',
+          error: 'Failed to create mix.',
+        }
+      );
     });
   };
 

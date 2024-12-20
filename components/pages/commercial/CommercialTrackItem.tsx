@@ -115,14 +115,20 @@ export function CommercialTrackItem({
     if (!editedTrack) return;
 
     setIsEditing(false);
-    startUpdateTrackTransition(async () => {
-      try {
-        if (!editedTrack) return;
-        if (selectArtist?.value === '') {
-          throw new Error('Artist field is required!');
-        } else if (selectedMixes.length === 0) {
-          throw new Error('Mixes field is required!');
-        } else {
+
+    startUpdateTrackTransition(() => {
+      toast.promise(
+        (async () => {
+          if (!editedTrack) return;
+
+          if (selectArtist?.value === '') {
+            throw new Error('Artist field is required!');
+          }
+
+          if (selectedMixes.length === 0) {
+            throw new Error('Mixes field is required!');
+          }
+
           await updateCommercialTrackWithMixes({
             commercialId: editedTrack?.id,
             trackId: editedTrack?.trackId || '',
@@ -131,16 +137,18 @@ export function CommercialTrackItem({
             title: trackTitle || '',
             artistId: selectArtist?.value || '',
           });
+
           if (refetch) {
             refetch();
           }
-          toast.success('Track updated');
+        })(),
+        {
+          loading: 'Saving track...',
+          success: 'Track updated successfully!',
+          error: (e) =>
+            e instanceof Error ? e.message : 'Something went wrong',
         }
-      } catch (e) {
-        const errorMessage =
-          e instanceof Error ? e.message : 'Something went wrong';
-        toast.error(errorMessage);
-      }
+      );
     });
   };
 
@@ -256,22 +264,25 @@ export function CommercialTrackItem({
   };
 
   const handleCreateMix = async (inputValue: string) => {
-    startTransition(async () => {
-      try {
-        const newMix = await addMix({
+    startTransition(() => {
+      toast.promise(
+        addMix({
           title: inputValue,
           trackId: track.trackId || '',
-        });
-        const newOption = { value: newMix.id, label: newMix.title };
+        }).then((newMix) => {
+          const newOption = { value: newMix.id, label: newMix.title };
 
-        setAllOptions((prev) => [...prev, newOption]);
-        setSelectedMixes((prev) => [...prev, newOption]);
+          setAllOptions((prev) => [...prev, newOption]);
+          setSelectedMixes((prev) => [...prev, newOption]);
 
-        toast.success('Mix created successfully!');
-        fetchMixes();
-      } catch (error) {
-        toast.error('Failed to create mix.');
-      }
+          fetchMixes();
+        }),
+        {
+          loading: 'Creating mix...',
+          success: 'Mix created successfully!',
+          error: 'Failed to create mix.',
+        }
+      );
     });
   };
 
