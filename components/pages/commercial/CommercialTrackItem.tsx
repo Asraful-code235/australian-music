@@ -229,17 +229,25 @@ export function CommercialTrackItem({
 
   const handleCreateArtist = async (inputValue: string) => {
     startTransition(async () => {
-      try {
-        const newArtist = await addArtist({
-          name: inputValue,
-          trackId: track.trackId || '',
-        });
-        const newOption = { value: newArtist.id, label: newArtist.name };
+      const promise = addArtist({
+        name: inputValue,
+        trackId: track.trackId || '',
+      });
 
-        setArtistOptions((prev) => [...prev, newOption]);
-        setSelectArtist(newOption);
-        toast.success('Artist created successfully!');
-        fetchArtists();
+      toast.promise(promise, {
+        loading: 'Creating artist...',
+        success: (newArtist) => {
+          const newOption = { value: newArtist.id, label: newArtist.name };
+          setArtistOptions((prev) => [...prev, newOption]);
+          setSelectArtist(newOption);
+          fetchArtists();
+          return 'Artist created successfully!';
+        },
+        error: 'Failed to create artist.',
+      });
+
+      try {
+        await promise;
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Something went wrong';
         toast.error(message);
