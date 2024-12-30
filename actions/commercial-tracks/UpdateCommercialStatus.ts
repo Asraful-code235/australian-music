@@ -9,18 +9,13 @@ export async function updateTrackStatus(items: UserTrack[]) {
       _max: { orderIndex: true },
     });
 
-    let currentOrderIndex = maxOrderIndex._max.orderIndex || 0;
-
     await db.$transaction(
       items.map((item: UserTrack) => {
-        currentOrderIndex += 1;
-
         return db.commercialTrack.update({
           where: { id: item.id },
           data: {
             status: true,
             isExport: false,
-            orderIndex: currentOrderIndex,
           },
         });
       })
