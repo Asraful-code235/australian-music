@@ -5,15 +5,16 @@ import { UserTrack } from '@/types/track';
 
 export async function updateTrackPosition(items: UserTrack[]) {
   try {
-    await db.$transaction(
-      items.map((item: UserTrack) => {
-        return db.commercialTrack.update({
-          where: { id: item.id },
-          data: { position: item.position },
-        });
+    const updates = items.map((item) =>
+      db.commercialTrack.update({
+        where: { id: item.id },
+        data: { position: item.position },
       })
     );
+
+    await db.$transaction(updates);
   } catch (e) {
-    throw new Error('Failed to update commercial track position');
+    console.error('Error updating track positions:', e);
+    throw new Error('Failed to update commercial track positions');
   }
 }
