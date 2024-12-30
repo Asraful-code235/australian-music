@@ -190,7 +190,8 @@ export default function CommercialPage() {
 
     setIsSaving(true);
     try {
-      await updateTrackStatus(tracks.slice(0, TracksLimit));
+      const topTracks = tracks.slice(0, TracksLimit); // Only top 20 tracks
+      await updateTrackStatus(topTracks);
       fetchCommercialTracks();
       trackImportCheckRefetch();
       toast.success('Playlist saved successfully');
