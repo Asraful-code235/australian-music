@@ -96,7 +96,15 @@ export default function CommercialPage() {
       );
 
       setTracks(newTracks);
-      await updateTrackPosition(newTracks);
+
+      const promise = updateTrackPosition(newTracks);
+
+      toast.promise(promise, {
+        loading: 'Track position updated loading...',
+        success: 'Track position updated successfully',
+        error: 'Failed to Track position updated',
+      });
+      // toast.success('Track position updated successfully');
       fetchCommercialTracks();
     }
   };
