@@ -26,6 +26,7 @@ export async function updateTrackStatus(items: UserTrack[]) {
       })
     );
   } catch (e) {
+    console.log({ e });
     throw new Error('Failed to update commercial track status');
   }
 }
