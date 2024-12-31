@@ -99,7 +99,7 @@ export default function TracksPage() {
       const promise = updateTrackPosition(newTracks);
 
       toast.promise(promise, {
-        loading: 'Track position updated loading...',
+        loading: 'Track position updating...',
         success: () => {
           fetchUpfrontTracks();
           return 'Track position updated successfully';

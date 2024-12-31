@@ -99,7 +99,7 @@ export default function CommercialPage() {
       const promise = updateTrackPosition(newTracks);
 
       toast.promise(promise, {
-        loading: 'Track position updated loading...',
+        loading: 'Track position updating...',
         success: () => {
           fetchCommercialTracks();
           return 'Track position updated successfully';
