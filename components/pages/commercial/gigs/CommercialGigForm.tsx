@@ -170,13 +170,6 @@ export default function CommercialGigsForm() {
                         mode='single'
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date() ||
-                          date >
-                            new Date(
-                              new Date().setMonth(new Date().getMonth() + 2)
-                            )
-                        }
                         initialFocus
                       />
                     </PopoverContent>
