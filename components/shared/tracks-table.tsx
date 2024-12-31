@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -65,11 +64,21 @@ export default function TracksTable({
   params,
   setParams,
 }: TrackTableProps) {
-  if (isLoading) return <div className='text-center py-4'>Loading...</div>;
+  const handlePreviousPage = () => {
+    if (data.page > 1) {
+      setParams({ ...params, page: String(Number(params.page) - 1) });
+    }
+  };
 
-  // Add a check for undefined data
-  if (!data || !data.data)
-    return <div className='text-center py-4'>No data available</div>;
+  const handleNextPage = () => {
+    if (data.page < data.totalPages) {
+      setParams({ ...params, page: String(Number(params.page) + 1) });
+    }
+  };
+
+  if (isLoading) return <div className='py-4'>Loading...</div>;
+
+  if (!data || !data.data) return <div className='py-4'>No data available</div>;
 
   return (
     <div className='mt-8'>
@@ -89,7 +98,9 @@ export default function TracksTable({
           <TableBody>
             {data.data.map((items, index) => (
               <TableRow key={items.id}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>
+                  {index + 1 + (data.page - 1) * data.limit}
+                </TableCell>
                 <TableCell>{items.position}</TableCell>
                 <TableCell>{items.user?.name}</TableCell>
                 <TableCell>{items.track?.title}</TableCell>
@@ -119,7 +130,7 @@ export default function TracksTable({
                   {items.track?.title}
                 </CardTitle>
                 <Badge variant='secondary' className='h-6'>
-                  #{index + 1}
+                  #{index + 1 + (data.page - 1) * data.limit}
                 </Badge>
               </div>
               <div className='flex items-center gap-1 text-sm text-muted-foreground'>
@@ -164,6 +175,28 @@ export default function TracksTable({
           </Card>
         ))}
       </div>
+
+      {data.totalPages > 1 && (
+        <div className='flex justify-between items-center mt-8'>
+          <Button
+            size='sm'
+            onClick={handlePreviousPage}
+            disabled={data.page === 1}
+          >
+            Previous
+          </Button>
+          <span className='text-sm text-muted-foreground'>
+            Page {data.page} of {data.totalPages}
+          </span>
+          <Button
+            size='sm'
+            onClick={handleNextPage}
+            disabled={data.page === data.totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -82,7 +82,9 @@ export default function GigsTable({
           <TableBody>
             {data.data.map((items, index) => (
               <TableRow key={items.id}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>
+                  {index + 1 + (data.page - 1) * data.limit}
+                </TableCell>
                 <TableCell>{items.user?.name}</TableCell>
                 <TableCell>{items.clubName}</TableCell>
                 <TableCell>{dayjs(items.dayOfGig).format('dddd')}</TableCell>

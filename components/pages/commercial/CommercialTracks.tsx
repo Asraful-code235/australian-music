@@ -45,6 +45,7 @@ export default function CommercialPage() {
   const [trackLoading, setTrackLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const {
     isLoading: trackImportCheckLoading,
@@ -94,18 +95,17 @@ export default function CommercialPage() {
           position: index + 1,
         })
       );
-
       setTracks(newTracks);
-
       const promise = updateTrackPosition(newTracks);
 
       toast.promise(promise, {
         loading: 'Track position updated loading...',
-        success: 'Track position updated successfully',
+        success: () => {
+          fetchCommercialTracks();
+          return 'Track position updated successfully';
+        },
         error: 'Failed to Track position updated',
       });
-      // toast.success('Track position updated successfully');
-      fetchCommercialTracks();
     }
   };
 
@@ -152,8 +152,10 @@ export default function CommercialPage() {
   };
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
+    setSearchLoading(true);
     const result = await SearchTrack(value, 'commercial');
     setSearchResult(result);
+    setSearchLoading(false);
   }, 500);
 
   const handleInputChange = (value: string) => {
@@ -198,8 +200,21 @@ export default function CommercialPage() {
 
     setIsSaving(true);
     try {
-      const topTracks = tracks.slice(0, TracksLimit); // Only top 20 tracks
-      await updateTrackStatus(topTracks);
+      await updateTrackStatus(tracks.slice(0, TracksLimit));
+
+      const remainingTracks = tracks.slice(TracksLimit);
+      const updatedTracks = remainingTracks.map((track, index) => ({
+        ...track,
+        position: index + 1,
+      }));
+
+      if (updatedTracks.length > 0) {
+        const positionUpdatePromises = updatedTracks.map((track) =>
+          updateTrackPosition([track])
+        );
+        await Promise.all(positionUpdatePromises);
+      }
+
       fetchCommercialTracks();
       trackImportCheckRefetch();
       toast.success('Playlist saved successfully');
@@ -260,19 +275,25 @@ export default function CommercialPage() {
             {search && (
               <div className='absolute w-full bg-white rounded-b-lg border border-t-0 shadow-lg z-[9999] max-h-[250px] overflow-y-auto'>
                 <div>
-                  {searchResult.map((track) => {
-                    return (
-                      <div
-                        key={track.id}
-                        className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
-                        onClick={() => handleSearchAndAdd(track)}
-                      >
-                        {track.title}
-                      </div>
-                    );
-                  })}
+                  {searchLoading ? (
+                    <div className='p-4 text-sm text-muted-foreground'>
+                      Loading...
+                    </div>
+                  ) : (
+                    searchResult.map((track) => {
+                      return (
+                        <div
+                          key={track.id}
+                          className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
+                          onClick={() => handleSearchAndAdd(track)}
+                        >
+                          {track.title}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
-                {searchResult.length < 1 && (
+                {searchResult.length < 1 && !searchLoading && (
                   <div className='p-2'>
                     <Button
                       variant='ghost'
