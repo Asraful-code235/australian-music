@@ -46,6 +46,7 @@ export default function CommercialPage() {
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
   const [isPending, startTransition] = useTransition();
   const [searchLoading, setSearchLoading] = useState(false);
+  const [isPendingImport, startImportTransition] = useTransition();
 
   const {
     isLoading: trackImportCheckLoading,
@@ -141,14 +142,20 @@ export default function CommercialPage() {
       toast.error('Please sign in to save your playlist');
       return;
     }
-    try {
-      await ImportCommercialTracks(session?.user?.id);
-      fetchCommercialTracks();
-      trackImportCheckRefetch();
-      toast.success('Tracks imported successfully');
-    } catch (error) {
-      toast.error('Failed to import tracks');
-    }
+    startImportTransition(() => {
+      toast.promise(
+        (async () => {
+          await ImportCommercialTracks(session?.user?.id);
+          fetchCommercialTracks();
+          trackImportCheckRefetch();
+        })(),
+        {
+          loading: 'Importing tracks...',
+          success: 'Tracks imported successfully',
+          error: 'Failed to import tracks',
+        }
+      );
+    });
   };
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
@@ -226,7 +233,7 @@ export default function CommercialPage() {
   };
 
   const handleError = (): Array<boolean> | undefined => {
-    const errorArray = tracks?.map((item) => {
+    const errorArray = tracks?.slice(0, TracksLimit).map((item) => {
       return (
         item.artists?.name === null ||
         item.artists?.name === '' ||
@@ -322,7 +329,9 @@ export default function CommercialPage() {
             <Button
               size='lg'
               onClick={handleImport}
-              disabled={!trackImportCheck || trackImportCheckLoading}
+              disabled={
+                !trackImportCheck || trackImportCheckLoading || isPendingImport
+              }
             >
               Import
             </Button>

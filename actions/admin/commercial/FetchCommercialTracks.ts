@@ -38,10 +38,12 @@ export const fetchCommercialTracks = async (data: string) => {
       take: limit,
       orderBy: [
         {
-          orderIndex: 'asc',
+          user: {
+            name: 'asc',
+          },
         },
         {
-          position: 'asc',
+          orderIndex: 'asc',
         },
       ],
       include: {

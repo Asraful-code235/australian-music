@@ -19,7 +19,10 @@ export async function getTracks(id: string | undefined) {
       },
     });
 
-    return tracks;
+    return tracks.map((track) => ({
+      ...track,
+      mixes: track.mixes.filter((mixEntry) => mixEntry.mix !== null),
+    }));
   } catch (error) {
     throw new Error(getErrorMessage(error));
   }
