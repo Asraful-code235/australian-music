@@ -63,7 +63,7 @@ export default function UpfrontGigsForm() {
         userId: session?.user.id || '',
       });
       if (newCommercialGig.id) {
-        toast.success('Commercial gig created successfully');
+        toast.success('Upfront gig created successfully');
         form.reset();
       }
     } catch (e) {
