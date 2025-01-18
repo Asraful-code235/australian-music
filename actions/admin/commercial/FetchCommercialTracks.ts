@@ -12,6 +12,8 @@ export const fetchCommercialTracks = async (data: string) => {
   try {
     const count = await db.commercialTrack.count({
       where: {
+        isExport: false,
+        status: true,
         user: {
           name: {
             contains: search,

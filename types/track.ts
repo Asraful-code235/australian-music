@@ -126,3 +126,5 @@ export type UserResponse = {
   totalPages: number;
   data: User[];
 };
+
+export type DeleteTracksTypes = 'all' | 'one_week' | 'one_month' | 'six_month';
