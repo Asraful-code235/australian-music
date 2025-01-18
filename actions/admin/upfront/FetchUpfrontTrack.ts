@@ -12,6 +12,8 @@ export const fetchUpfrontTracks = async (data: string) => {
   try {
     const count = await db.upfrontTrack.count({
       where: {
+        isExport: false,
+        status: true,
         user: {
           name: {
             contains: search,

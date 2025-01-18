@@ -28,7 +28,7 @@ export const getErrorMessage = (error: unknown) => {
   return message;
 };
 
-export const TracksLimit = 20;
+export const TracksLimit = 2;
 
 export function generateQueryString(params: any) {
   const isEmpty = Object.values(params).every((value) => value === '');
@@ -55,14 +55,12 @@ export const exportToCSV = (data: PaginatedTracks, filename: string) => {
   if (!data || !data.data) return;
 
   const headers = [
-    'Position',
-    'Artist',
-    'Created At',
-    'Updated At',
-    'User Name',
-    'User Email',
+    'Chart Position',
+    'DJ Name',
     'Track Title',
-    'Mix Titles',
+    'Artist',
+    'Mix',
+    'Label',
   ].join(',');
 
   const rows = data.data.map((item: UserTrack) => {
@@ -70,13 +68,11 @@ export const exportToCSV = (data: PaginatedTracks, filename: string) => {
       item.mixes?.map((mix) => mix?.mix?.title)?.join('; ') || '';
     return [
       item.position,
-      item.artists?.name || '',
-      dayjs(item.createdAt).format('DD-MM-YYYY'),
-      dayjs(item.updatedAt).format('DD-MM-YYYY'),
       item.user?.name,
-      item.user?.email,
       item.track?.title,
+      item.artists?.name || '',
       mixTitles,
+      item.label,
     ]
       .map((value) => `"${value || ''}"`)
       .join(',');
