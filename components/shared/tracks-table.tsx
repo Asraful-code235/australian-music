@@ -17,6 +17,7 @@ import TracksTableRow from './tracks-table-row';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import TrackCardItems from './track-card-items';
 
 export type UserTrack = {
   id?: string;
@@ -159,59 +160,14 @@ export default function TracksTable({
       {/* Tablet view (2-column cards) */}
       <div className='grid lg:hidden grid-cols-1 md:grid-cols-2 gap-4'>
         {data.data.map((items, index) => (
-          <Card
+          <TrackCardItems
             key={items.id}
-            className='w-full hover:shadow-lg transition-shadow'
-          >
-            <CardHeader className='space-y-1'>
-              <div className='flex items-center justify-between'>
-                <CardTitle className='text-2xl font-bold'>
-                  {items.track?.title}
-                </CardTitle>
-                <Badge variant='secondary' className='h-6'>
-                  #{index + 1 + (data.page - 1) * data.limit}
-                </Badge>
-              </div>
-              <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                <Trophy className='h-4 w-4' />
-                <span>Chart Position: {items.position}</span>
-              </div>
-            </CardHeader>
-            <CardContent className='grid gap-4'>
-              <div className='grid gap-2'>
-                <div className='flex items-center gap-2'>
-                  <User className='h-4 w-4 text-muted-foreground' />
-                  <div className='grid gap-0.5'>
-                    <label className='text-sm font-medium'>DJ Name</label>
-                    <span className='text-sm text-muted-foreground'>
-                      {items.user?.name}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <Music2 className='h-4 w-4 text-muted-foreground' />
-                  <div className='grid gap-0.5'>
-                    <label className='text-sm font-medium'>Artist</label>
-                    <span className='text-sm text-muted-foreground'>
-                      {items?.artists?.name}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <Music2 className='h-4 w-4 text-muted-foreground rotate-90' />
-                  <div className='grid gap-0.5'>
-                    <label className='text-sm font-medium'>Mix</label>
-                    <span className='text-sm text-muted-foreground'>
-                      {items.mixes
-                        ?.map((item) => item?.mix?.title)
-                        .filter(Boolean)
-                        .join(', ')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            index={index}
+            data={data}
+            items={items}
+            refetch={refetch}
+            trackType={trackType}
+          />
         ))}
       </div>
 

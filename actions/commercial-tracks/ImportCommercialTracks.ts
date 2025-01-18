@@ -14,16 +14,12 @@ export async function ImportCommercialTracks(userId: string) {
     });
 
     if (tracks.length === 0) {
-      console.log('No tracks found with status: false for this user.');
       return { success: false, message: 'No tracks found to update' };
     }
-
-    console.log('Tracks fetched:', tracks);
 
     // Assign a new position based on the sorted order and update the database
     const updates = await Promise.all(
       tracks.map((track, index) => {
-        console.log(`Updating track ID: ${track.id} to position: ${index + 1}`);
         return db.commercialTrack.update({
           where: { id: track.id },
           data: {
