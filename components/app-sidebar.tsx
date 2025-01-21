@@ -60,6 +60,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
       {
+        title: 'Artists & Mixes',
+        url: '#',
+        items: [
+          {
+            title: 'Artists',
+            url: '/dashboard/tracks/artists',
+          },
+          {
+            title: 'Mixes',
+            url: '/dashboard/tracks/mixes',
+          },
+        ],
+      },
+      {
         title: 'Settings',
         url: '#',
         items: [
