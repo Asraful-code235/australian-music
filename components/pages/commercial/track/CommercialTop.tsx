@@ -3,7 +3,6 @@
 import { deleteCommercialTracks } from '@/actions/admin/commercial/DeleteCommercialTracks';
 import { fetchCommercialTracks } from '@/actions/admin/commercial/FetchCommercialTracks';
 import DeleteTrackSelect from '@/components/shared/delete-track-select';
-import NoDataFound from '@/components/shared/no-data-found';
 import TracksTable from '@/components/shared/tracks-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,15 +69,6 @@ export default function CommercialTop() {
   useEffect(() => {
     refetch();
   }, [params, refetch]);
-
-  // const handleExport = async () => {
-  //   if (!commercialData?.data || commercialData?.data.length === 0) return;
-
-  //   exportToCSV(commercialData, 'commercial-track.csv');
-  //   const ids = commercialData.data.map((gig: { id: string }) => gig.id);
-  //   await updateCommercialExportStatus(ids);
-  //   refetch();
-  // };
 
   const handleExportClick = () => {
     if (!commercialData?.data || commercialData?.data.length === 0) return;
