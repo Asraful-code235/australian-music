@@ -62,11 +62,20 @@ export const fetchUpfrontTracks = async (data: string) => {
         },
         track: true,
         mixes: {
+          where: {
+            mix: {
+              isDeleted: false,
+            },
+          },
           include: {
             mix: true,
           },
         },
-        artists: true,
+        artists: {
+          where: {
+            isDeleted: false,
+          },
+        },
       },
     });
 

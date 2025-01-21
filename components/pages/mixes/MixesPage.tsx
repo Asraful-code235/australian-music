@@ -30,10 +30,22 @@ import { updateArtist } from '@/actions/shared/UpdateArtist';
 import { getAllMixes } from '@/actions/shared/GetAllMixes';
 import MixEditForm from '@/components/shared/MixEditform';
 import { updateMix } from '@/actions/shared/UpdateMix';
+import { FiTrash2 } from 'react-icons/fi';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { deleteMix } from '@/actions/shared/DeleteMix';
 
 const tableHeaders = [
   { key: 'title', value: 'Title' },
-  { key: 'actions', value: 'Actions' },
+  { key: 'actions', value: 'Actions', width: '140px' },
 ];
 
 const MixSchema = z.object({
@@ -50,6 +62,7 @@ export default function MixesPage() {
   const [selectedMix, setSelectedMix] = useState<Record<string, any> | null>(
     null
   );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [params, setParams] = useState({
     search: searchParams.get('search') || '',
@@ -129,6 +142,21 @@ export default function MixesPage() {
     });
   };
 
+  const handleDelete = async () => {
+    if (!selectedMix) return;
+
+    startTransition(async () => {
+      try {
+        await deleteMix(selectedMix.id);
+        toast.success('Mix deleted successfully!');
+        setIsDeleteDialogOpen(false);
+        refetch();
+      } catch (error) {
+        toast.error('Failed to delete artist');
+      }
+    });
+  };
+
   return (
     <div className='container mx-auto py-10'>
       <div className='space-y-2'>
@@ -137,7 +165,7 @@ export default function MixesPage() {
         </div>
         <div className='flex lg:flex-row flex-col justify-between gap-3'>
           <Input
-            placeholder='Search by artist name...'
+            placeholder='Search by mix title...'
             defaultValue={params.search}
             onChange={(e) => debounced(e.target.value)}
             className='w-full lg:w-2/6'
@@ -153,17 +181,45 @@ export default function MixesPage() {
             setSelectedMix(mix);
             setIsEditModalOpen(true);
           }}
+          customActions={(item) => (
+            <Button
+              variant='outline'
+              size='icon'
+              className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+              onClick={() => {
+                setSelectedMix(item);
+                setIsDeleteDialogOpen(true);
+              }}
+            >
+              <FiTrash2 className='h-4 w-4' />
+            </Button>
+          )}
         />
       </div>
 
-      {/* <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Artist</DialogTitle>
-          </DialogHeader>
-         
-        </DialogContent>
-      </Dialog> */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              artist and remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <ModalForm<MixInput>
         isOpen={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}
@@ -174,7 +230,6 @@ export default function MixesPage() {
         isPending={isPending}
       >
         <MixEditForm errors={errors} register={register} />
-        {/* <div>check</div> */}
       </ModalForm>
     </div>
   );

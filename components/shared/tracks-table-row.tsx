@@ -263,12 +263,22 @@ export default function TracksTableRow({
       <TableCell>{items.position}</TableCell>
       <TableCell>{items.user?.name}</TableCell>
       <TableCell>{items.track?.title}</TableCell>
-      <TableCell>{items.artists?.name}</TableCell>
       <TableCell>
-        {items.mixes
-          ?.map((item) => item?.mix?.title)
-          .filter(Boolean)
-          .join(', ')}
+        {items.artists?.name ? (
+          items.artists?.name
+        ) : (
+          <span className='text-red-500'>N/A</span>
+        )}
+      </TableCell>
+      <TableCell>
+        {items.mixes.length > 0 ? (
+          items.mixes
+            ?.map((item) => item?.mix?.title)
+            .filter(Boolean)
+            .join(', ')
+        ) : (
+          <span className='text-red-500'>N/A</span>
+        )}
       </TableCell>
       <TableCell>
         {trackType === 'commercial' ? (

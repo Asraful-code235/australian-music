@@ -16,7 +16,14 @@ export const getArtist = async ({
         {
           trackId: trackId,
         },
-        { OR: [{ name: { contains: search, mode: 'insensitive' } }] },
+        {
+          OR: [
+            {
+              name: { contains: search, mode: 'insensitive' },
+              isDeleted: false,
+            },
+          ],
+        },
       ],
     },
   });
@@ -27,7 +34,14 @@ export const getArtist = async ({
         {
           trackId: trackId,
         },
-        { OR: [{ name: { contains: search, mode: 'insensitive' } }] },
+        {
+          OR: [
+            {
+              name: { contains: search, mode: 'insensitive' },
+              isDeleted: false,
+            },
+          ],
+        },
       ],
     },
     skip: (pageNumber - 1) * limit,

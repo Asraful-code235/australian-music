@@ -12,14 +12,24 @@ export const getAllMixes = async (data: string) => {
   try {
     const count = await db.mix.count({
       where: {
-        OR: [{ title: { contains: search, mode: 'insensitive' } }],
+        OR: [
+          {
+            title: { contains: search, mode: 'insensitive' },
+            isDeleted: false,
+          },
+        ],
       },
     });
     const totalPages = Math.ceil(count / limit);
 
     const mixes = await db.mix.findMany({
       where: {
-        OR: [{ title: { contains: search, mode: 'insensitive' } }],
+        OR: [
+          {
+            title: { contains: search, mode: 'insensitive' },
+            isDeleted: false,
+          },
+        ],
       },
       skip: (page - 1) * limit,
       take: limit,

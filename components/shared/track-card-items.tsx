@@ -67,7 +67,11 @@ export default function TrackCardItems({
             <div className='grid gap-0.5'>
               <label className='text-sm font-medium'>Artist</label>
               <span className='text-sm text-muted-foreground'>
-                {items?.artists?.name}
+                {items?.artists?.name ? (
+                  items?.artists?.name
+                ) : (
+                  <span className='text-red-500'>N/A</span>
+                )}
               </span>
             </div>
           </div>
@@ -76,10 +80,14 @@ export default function TrackCardItems({
             <div className='grid gap-0.5'>
               <label className='text-sm font-medium'>Mix</label>
               <span className='text-sm text-muted-foreground'>
-                {items.mixes
-                  ?.map((item) => item?.mix?.title)
-                  .filter(Boolean)
-                  .join(', ')}
+                {items.mixes.length > 0 ? (
+                  items.mixes
+                    ?.map((item) => item?.mix?.title)
+                    .filter(Boolean)
+                    .join(', ')
+                ) : (
+                  <span className='text-red-500'>N/A</span>
+                )}
               </span>
             </div>
           </div>

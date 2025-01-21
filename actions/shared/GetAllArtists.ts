@@ -12,14 +12,18 @@ export const getAllArtists = async (data: string) => {
   try {
     const count = await db.artist.count({
       where: {
-        OR: [{ name: { contains: search, mode: 'insensitive' } }],
+        OR: [
+          { name: { contains: search, mode: 'insensitive' }, isDeleted: false },
+        ],
       },
     });
     const totalPages = Math.ceil(count / limit);
 
     const artists = await db.artist.findMany({
       where: {
-        OR: [{ name: { contains: search, mode: 'insensitive' } }],
+        OR: [
+          { name: { contains: search, mode: 'insensitive' }, isDeleted: false },
+        ],
       },
       skip: (page - 1) * limit,
       take: limit,

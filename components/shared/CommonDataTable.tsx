@@ -13,6 +13,7 @@ type DataTableProps = {
   headers: {
     key: string;
     value: string;
+    width?: string;
   }[];
   data: { data: Record<string, any>[]; page: number; totalPages: number };
   loading: boolean;
@@ -22,6 +23,7 @@ type DataTableProps = {
   };
   setParams: (params: { search: string; page: string }) => void;
   onEdit?: (item: Record<string, any>) => void;
+  customActions?: (item: Record<string, any>) => React.ReactNode;
 };
 
 export default function CommonDataTable({
@@ -31,6 +33,7 @@ export default function CommonDataTable({
   params,
   setParams,
   onEdit,
+  customActions,
 }: DataTableProps) {
   const handlePreviousPage = () => {
     if (data.page > 1) {
@@ -54,9 +57,8 @@ export default function CommonDataTable({
             {headers.map((header, index) => (
               <TableHead
                 key={index}
-                className={`capitalize ${
-                  header.key === 'actions' ? 'w-[60px]' : ''
-                }`}
+                className={`capitalize`}
+                style={{ width: header.width }}
               >
                 {header.value}
               </TableHead>
@@ -69,10 +71,10 @@ export default function CommonDataTable({
               {headers.map((header, colIndex) => (
                 <TableCell
                   key={`${rowIndex}-${colIndex}`}
-                  className={header.key === 'actions' ? 'w-[60px]' : ''}
+                  style={{ width: header.width }}
                 >
                   {header.key === 'actions' ? (
-                    <div className='flex gap-2'>
+                    <div className='flex items-center gap-2'>
                       {onEdit && (
                         <Button
                           variant='outline'
@@ -81,6 +83,11 @@ export default function CommonDataTable({
                         >
                           Edit
                         </Button>
+                      )}
+                      {customActions && (
+                        <div className='flex items-center gap-2'>
+                          {customActions(item)}
+                        </div>
                       )}
                     </div>
                   ) : (

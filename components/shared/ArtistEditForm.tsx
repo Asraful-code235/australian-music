@@ -4,14 +4,9 @@ import { Label } from '../ui/label';
 import { ArtistInput } from '../pages/artists/ArtistsPage';
 
 type ArtistEditFormProps = {
-  handleSubmit: any;
   onSubmit: any;
-  isLoading?: boolean;
-  serverError?: string;
   errors: any;
-  control: any;
   register: any;
-  isValid?: boolean;
 };
 
 export default function ArtistEditForm({
