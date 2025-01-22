@@ -48,6 +48,7 @@ model Mix {
   trackId        String
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+  isDeleted      Boolean?          @default(false)
   upfrontTracks  UpfrontMixTrack[] @relation("MixTracks")
   commercialTracks CommercialMixTrack[] @relation("MixTracks")
 }
@@ -58,6 +59,7 @@ model Artist {
   trackId         String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  isDeleted       Boolean?          @default(false)
   upfrontTrack    UpfrontTrack[]    @relation("upfrontArtist")
   commercialTrack CommercialTrack[] @relation("commercialArtist")
 }

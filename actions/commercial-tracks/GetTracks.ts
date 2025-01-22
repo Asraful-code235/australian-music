@@ -11,6 +11,11 @@ export async function getTracks(id: string | undefined) {
       include: {
         track: true,
         mixes: {
+          where: {
+            mix: {
+              isDeleted: false,
+            },
+          },
           include: {
             mix: true,
           },

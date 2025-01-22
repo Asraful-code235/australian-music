@@ -6,7 +6,6 @@ import { fetchAllUpfrontTracks } from '@/actions/admin/upfront/FetchAllUpfrontTr
 import { updateUpfrontExportStatus } from '@/actions/upfront-tracks/UpfrontTracksExport';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import DeleteTrackSelect from '@/components/shared/delete-track-select';
-import NoDataFound from '@/components/shared/no-data-found';
 import TracksTable from '@/components/shared/tracks-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -137,13 +136,13 @@ export default function UpfrontTop() {
           </h1>
         </div>
         <div className='flex lg:flex-row flex-col justify-between gap-3'>
-          <div className='flex w-full max-w-sm items-center space-x-2'>
-            <Input
-              placeholder='Search tracks...'
-              value={params.search}
-              onChange={(e) => debounced(e.target.value)}
-            />
-          </div>
+          <Input
+            placeholder='Search by DJ name...'
+            defaultValue={params.search}
+            onChange={(e) => debounced(e.target.value)}
+            className='w-full lg:w-2/6'
+          />
+
           <div className='flex items-center gap-2'>
             <Button
               variant='outline'
