@@ -119,7 +119,10 @@ export default function TracksPage() {
       return;
     }
 
-    const position = tracks.length ? tracks.length + 1 : 1;
+    // Calculate the next position based on the maximum position in existing tracks
+    const maxPosition = tracks.reduce((max, track) => Math.max(max, track.position || 0), 0);
+    const position = maxPosition + 1;
+
     startTransition(async () => {
       try {
         const res = await addTracks({

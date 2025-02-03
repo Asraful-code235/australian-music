@@ -32,6 +32,7 @@ export const deleteCommercialTracks = async (
   try {
     const deleteResult = await db.commercialTrack.deleteMany({
       where: {
+        status: true,
         ...(startDate
           ? {
               createdAt: {

@@ -32,6 +32,7 @@ export const deleteUpfrontTracks = async (
   try {
     const deleteResult = await db.upfrontTrack.deleteMany({
       where: {
+        status: true,
         ...(startDate
           ? {
               createdAt: {
@@ -42,6 +43,7 @@ export const deleteUpfrontTracks = async (
           : {}),
       },
     });
+    console.log({ deleteResult });
   } catch (error) {
     console.error('Error deleting CommercialTracks:', error);
   }
