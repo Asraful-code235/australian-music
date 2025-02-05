@@ -4,27 +4,43 @@ import { db } from '@/db';
 
 export async function ImportUpfrontTracks(userId: string) {
   try {
-    // Fetch all tracks for the user where status is false, ordered by `orderIndex`
-    const tracks = await db.upfrontTrack.findMany({
+    // First, get the maximum position from existing tracks (where status is false)
+    const existingTracks = await db.upfrontTrack.findMany({
       where: {
         userId,
-        status: true, // Include only tracks where status is false
+        status: false,
       },
-      orderBy: { orderIndex: 'asc' }, // Ensure tracks are sorted by `orderIndex`
+      orderBy: {
+        position: 'desc',
+      },
+      take: 1,
     });
 
-    if (tracks.length === 0) {
+    const startPosition = existingTracks.length > 0 
+      ? (existingTracks[0].position || 0) + 1 
+      : 1;
+
+    // Fetch all tracks for the user where status is true, ordered by orderIndex
+    const tracksToImport = await db.upfrontTrack.findMany({
+      where: {
+        userId,
+        status: true,
+      },
+      orderBy: { orderIndex: 'asc' },
+    });
+
+    if (tracksToImport.length === 0) {
       return { success: false, message: 'No tracks found to update' };
     }
 
-    // Assign a new position based on the sorted order and update the database
+    // Assign new positions continuing from the last existing position
     const updates = await Promise.all(
-      tracks.map((track, index) => {
+      tracksToImport.map((track, index) => {
         return db.upfrontTrack.update({
           where: { id: track.id },
           data: {
-            position: index + 1, // Assign position starting from 1
-            status: false, // Ensure the status remains false
+            position: startPosition + index,
+            status: false,
           },
         });
       })

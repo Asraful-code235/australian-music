@@ -117,7 +117,9 @@ export default function CommercialPage() {
     if (!userId) {
       return;
     }
-    const position = tracks.length ? tracks.length + 1 : 1;
+    const maxPosition = tracks.reduce((max, track) => Math.max(max, track.position || 0), 0);
+    const position = maxPosition + 1;
+
     startTransition(async () => {
       try {
         await addTracks({ title: search, userId, position });
