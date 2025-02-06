@@ -169,7 +169,7 @@ export default function CommercialTop() {
       <ConfirmModal
         isOpen={isConfirmOpen}
         setIsOpen={setIsConfirmOpen}
-        title='This action cannot be undone. This will permanently delete your Upfront Tracks and remove your data from our servers.'
+        title='This action cannot be undone. This will permanently delete your Commercial Tracks and remove your data from our servers.'
         onClick={handleConfirmDelete}
       />
       <AlertDialog
