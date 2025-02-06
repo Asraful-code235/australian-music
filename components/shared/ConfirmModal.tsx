@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +16,7 @@ type ConfirmModalProps = {
   onClick: () => void;
   title?: string;
   reset?: () => void;
+  loading?: boolean;
 };
 
 export default function ConfirmModal({
@@ -23,6 +25,7 @@ export default function ConfirmModal({
   onClick,
   title,
   reset,
+  loading,
   ...props
 }: ConfirmModalProps) {
   const onOpenChange = () => {
@@ -36,8 +39,17 @@ export default function ConfirmModal({
           {title && <AlertDialogDescription>{title}</AlertDialogDescription>}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onClick}>Continue</AlertDialogAction>
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onClick} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Saving...
+              </>
+            ) : (
+              'Continue'
+            )}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

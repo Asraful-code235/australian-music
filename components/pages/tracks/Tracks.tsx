@@ -34,6 +34,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { SearchTrack } from '@/actions/shared/SearchTrack';
 import { ImportUpfrontTracks } from '@/actions/upfront-tracks/ImportUpfrontTracks';
 import { checkImport } from '@/actions/upfront-tracks/checkImport';
+import ConfirmModal from '@/components/shared/ConfirmModal';
 
 export default function TracksPage() {
   const { data: session, status } = useSession();
@@ -47,6 +48,7 @@ export default function TracksPage() {
   const [isPending, startTransition] = useTransition();
   const [searchLoading, setSearchLoading] = useState(false);
   const [isPendingImport, startImportTransition] = useTransition();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const fetchUpfrontTracks = async () => {
     if (!session?.user.id) return;
@@ -120,7 +122,10 @@ export default function TracksPage() {
     }
 
     // Calculate the next position based on the maximum position in existing tracks
-    const maxPosition = tracks.reduce((max, track) => Math.max(max, track.position || 0), 0);
+    const maxPosition = tracks.reduce(
+      (max, track) => Math.max(max, track.position || 0),
+      0
+    );
     const position = maxPosition + 1;
 
     startTransition(async () => {
@@ -209,6 +214,10 @@ export default function TracksPage() {
   if (status === 'loading') {
     return <Loading />;
   }
+
+  const handleDeleteClick = () => {
+    setIsConfirmOpen(true);
+  };
 
   const handleSavePlaylist = async () => {
     if (!session) {
@@ -364,7 +373,7 @@ export default function TracksPage() {
         {tracks.length > 0 && (
           <Button
             className='w-full'
-            onClick={handleSavePlaylist}
+            onClick={handleDeleteClick}
             disabled={tracks.length < TracksLimit || isSaving || !allTrue}
           >
             {isSaving ? (
@@ -380,6 +389,13 @@ export default function TracksPage() {
           </Button>
         )}
       </div>
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        setIsOpen={setIsConfirmOpen}
+        loading={isSaving}
+        title='This action can be reorder your tracks, are you sure you want to save the playlist?'
+        onClick={handleSavePlaylist}
+      />
     </div>
   );
 }

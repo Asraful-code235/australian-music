@@ -125,7 +125,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ].filter((item) => {
       if (
         !isAdmin &&
-        ['Commercial', 'Upfront', 'Settings'].includes(item.title)
+        ['Commercial', 'Upfront', 'Settings', 'Artists & Mixes'].includes(
+          item.title
+        )
       ) {
         return false;
       }
