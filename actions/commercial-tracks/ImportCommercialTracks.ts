@@ -4,23 +4,16 @@ import { db } from '@/db';
 
 export async function ImportCommercialTracks(userId: string) {
   try {
-    // First, get the maximum position from existing tracks (where status is false)
     const existingTracks = await db.commercialTrack.findMany({
       where: {
         userId,
         status: false,
       },
       orderBy: {
-        position: 'desc',
+        position: 'asc',
       },
-      take: 1,
     });
 
-    const startPosition = existingTracks.length > 0 
-      ? (existingTracks[0].position || 0) + 1 
-      : 1;
-
-    // Fetch all tracks for the user where status is true, ordered by orderIndex
     const tracksToImport = await db.commercialTrack.findMany({
       where: {
         userId,
@@ -33,18 +26,32 @@ export async function ImportCommercialTracks(userId: string) {
       return { success: false, message: 'No tracks found to update' };
     }
 
-    // Assign new positions continuing from the last existing position
-    const updates = await Promise.all(
-      tracksToImport.map((track, index) => {
-        return db.commercialTrack.update({
-          where: { id: track.id },
-          data: {
-            position: startPosition + index,
-            status: false,
-          },
-        });
-      })
-    );
+    await db.$transaction(async (prisma) => {
+      await Promise.all(
+        tracksToImport.map((track, index) =>
+          prisma.commercialTrack.update({
+            where: { id: track.id },
+            data: {
+              position: index + 1,
+              status: false,
+            },
+          })
+        )
+      );
+
+      if (existingTracks.length > 0) {
+        await Promise.all(
+          existingTracks.map((track, index) =>
+            prisma.commercialTrack.update({
+              where: { id: track.id },
+              data: {
+                position: tracksToImport.length + index + 1,
+              },
+            })
+          )
+        );
+      }
+    });
 
     return { success: true, message: 'Track positions updated successfully' };
   } catch (error) {

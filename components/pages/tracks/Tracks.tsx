@@ -42,7 +42,7 @@ export default function TracksPage() {
   const [tracks, setTracks] = useState<UserTrack[]>([]);
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState([]);
+  const [hasExactMatch, setHasExactMatch] = useState(false);
   const [trackLoading, setTrackLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -113,7 +113,7 @@ export default function TracksPage() {
   };
 
   const handleAddTrack = async () => {
-    if (!search.trim()) return;
+    if (!search.trim() || hasExactMatch) return;
 
     const userId = session?.user.id;
     if (!userId) {
@@ -154,8 +154,9 @@ export default function TracksPage() {
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
     setSearchLoading(true);
-    const result = await SearchTrack(value, 'upfront');
-    setSearchResult(result);
+    const { results, hasExactMatch } = await SearchTrack(value, 'upfront');
+    setHasExactMatch(hasExactMatch);
+    setSearchResult(results);
     setSearchLoading(false);
   }, 500);
 
@@ -311,7 +312,7 @@ export default function TracksPage() {
                       return (
                         <div
                           key={track.id}
-                          className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
+                          className='py-2 px-4 hover:bg-gray-100 cursor-pointer text-sm'
                           onClick={() => handleSearchAndAdd(track)}
                         >
                           {track.title}
@@ -320,11 +321,11 @@ export default function TracksPage() {
                     })
                   )}
                 </div>
-                {searchResult.length < 1 && !searchLoading && (
+                {!searchLoading && !hasExactMatch && (
                   <div className='p-2'>
                     <Button
                       variant='ghost'
-                      className='w-full justify-start'
+                      className='w-full justify-start px-2'
                       onClick={handleAddTrack}
                       disabled={isPending}
                     >

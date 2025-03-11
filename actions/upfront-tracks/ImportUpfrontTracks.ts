@@ -4,23 +4,18 @@ import { db } from '@/db';
 
 export async function ImportUpfrontTracks(userId: string) {
   try {
-    // First, get the maximum position from existing tracks (where status is false)
+    // Get all existing tracks that aren't saved (status: false)
     const existingTracks = await db.upfrontTrack.findMany({
       where: {
         userId,
         status: false,
       },
       orderBy: {
-        position: 'desc',
+        position: 'asc',
       },
-      take: 1,
     });
 
-    const startPosition = existingTracks.length > 0 
-      ? (existingTracks[0].position || 0) + 1 
-      : 1;
-
-    // Fetch all tracks for the user where status is true, ordered by orderIndex
+    // Get tracks to import (saved playlist tracks)
     const tracksToImport = await db.upfrontTrack.findMany({
       where: {
         userId,
@@ -33,18 +28,35 @@ export async function ImportUpfrontTracks(userId: string) {
       return { success: false, message: 'No tracks found to update' };
     }
 
-    // Assign new positions continuing from the last existing position
-    const updates = await Promise.all(
-      tracksToImport.map((track, index) => {
-        return db.upfrontTrack.update({
-          where: { id: track.id },
-          data: {
-            position: startPosition + index,
-            status: false,
-          },
-        });
-      })
-    );
+    // Start transaction to update all positions atomically
+    await db.$transaction(async (prisma) => {
+      // First, update imported tracks to take positions starting from 1
+      await Promise.all(
+        tracksToImport.map((track, index) =>
+          prisma.upfrontTrack.update({
+            where: { id: track.id },
+            data: {
+              position: index + 1,
+              status: false,
+            },
+          })
+        )
+      );
+
+      // Then, shift existing tracks to start after imported tracks
+      if (existingTracks.length > 0) {
+        await Promise.all(
+          existingTracks.map((track, index) =>
+            prisma.upfrontTrack.update({
+              where: { id: track.id },
+              data: {
+                position: tracksToImport.length + index + 1,
+              },
+            })
+          )
+        );
+      }
+    });
 
     return { success: true, message: 'Track positions updated successfully' };
   } catch (error) {

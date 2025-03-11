@@ -45,6 +45,7 @@ export default function CommercialPage() {
 
   const [trackLoading, setTrackLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Tracks[]>([]);
+  const [hasExactMatch, setHasExactMatch] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [searchLoading, setSearchLoading] = useState(false);
   const [isPendingImport, startImportTransition] = useTransition();
@@ -113,7 +114,7 @@ export default function CommercialPage() {
   };
 
   const handleAddTrack = async () => {
-    if (!search.trim()) return;
+    if (!search.trim() || hasExactMatch) return;
 
     const userId = session?.user.id;
     if (!userId) {
@@ -167,8 +168,9 @@ export default function CommercialPage() {
 
   const handleSearch = useDebouncedCallback(async (value: string) => {
     setSearchLoading(true);
-    const result = await SearchTrack(value, 'commercial');
-    setSearchResult(result);
+    const { results, hasExactMatch } = await SearchTrack(value, 'commercial');
+    setSearchResult(results);
+    setHasExactMatch(hasExactMatch);
     setSearchLoading(false);
   }, 500);
 
@@ -278,13 +280,13 @@ export default function CommercialPage() {
         <div className='flex gap-3'>
           <div className='relative flex-1'>
             <Command className='rounded-lg border shadow-md'>
-              <div className='flex items-center border-b px-3'>
+              <div className='flex items-center px-3'>
                 <Music className='mr-2 h-4 w-4 shrink-0 opacity-50' />
                 <Input
                   placeholder='Search or create a track...'
                   value={search}
                   onChange={(e) => handleInputChange(e.target.value)}
-                  className='flex h-10 w-full border-none shadow-none focus-none  focus-visible:ring-0'
+                  className='flex h-10 w-full border-none shadow-none focus-none focus-visible:ring-0'
                 />
               </div>
             </Command>
@@ -297,24 +299,22 @@ export default function CommercialPage() {
                       Loading...
                     </div>
                   ) : (
-                    searchResult.map((track) => {
-                      return (
-                        <div
-                          key={track.id}
-                          className='py-2 px-4 hover:bg-gray-100 cursor-pointer'
-                          onClick={() => handleSearchAndAdd(track)}
-                        >
-                          {track.title}
-                        </div>
-                      );
-                    })
+                    searchResult.map((track) => (
+                      <div
+                        key={track.id}
+                        className='py-2 px-4 hover:bg-gray-100 cursor-pointer text-sm'
+                        onClick={() => handleSearchAndAdd(track)}
+                      >
+                        {track.title}
+                      </div>
+                    ))
                   )}
                 </div>
-                {searchResult.length < 1 && !searchLoading && (
+                {!searchLoading && !hasExactMatch && (
                   <div className='p-2'>
                     <Button
                       variant='ghost'
-                      className='w-full justify-start'
+                      className='w-full justify-start px-2'
                       onClick={handleAddTrack}
                       disabled={isPending}
                     >
